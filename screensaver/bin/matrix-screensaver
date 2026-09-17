@@ -1,0 +1,183 @@
+#!/bin/bash
+# Screensaver Matrix para Omarchy, sobre Rezmason/matrix (WebGL, MIT).
+#
+# Levanta un servidor HTTP efimero en loopback sirviendo la copia vendorizada
+# y abre Chromium en modo app, una ventana por monitor, con la clase
+# org.omarchy.screensaver -- la misma que ya matchean las windowrules de
+# Omarchy (/usr/share/omarchy/default/hypr/apps/system.lua) para fullscreen.
+#
+# Uso:
+#   matrix-screensaver [--version <preset>] [--param clave=valor]... [--monitor <nombre>]
+#   matrix-screensaver --list        lista los presets disponibles
+#   matrix-screensaver --print-url   muestra la URL resuelta sin abrir nada
+#
+# Presets en ../presets/. Config opcional del usuario:
+#   ~/.config/omarchy/matrix-screensaver.conf   (mismo formato clave=valor)
+
+set -uo pipefail
+
+HERE="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+SCREENSAVER_DIR="$(dirname -- "$HERE")"
+VENDOR_DIR="$SCREENSAVER_DIR/vendor/matrix"
+OVERLAY_DIR="$SCREENSAVER_DIR/overlay"
+PRESET_DIR="$SCREENSAVER_DIR/presets"
+USER_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/matrix-screensaver.conf"
+
+DEFAULT_PRESET=operator
+
+die() { echo "matrix-screensaver: $*" >&2; exit 1; }
+
+# --- argumentos ---------------------------------------------------------------
+preset=""
+declare -a extra_params=()
+only_monitor=""
+print_url=0
+
+while (($#)); do
+  case $1 in
+  --version) preset="${2:?--version necesita un nombre de preset}"; shift 2 ;;
+  --param) extra_params+=("${2:?--param necesita clave=valor}"); shift 2 ;;
+  --monitor) only_monitor="${2:?--monitor necesita un nombre}"; shift 2 ;;
+  --print-url) print_url=1; shift ;;
+  --list)
+    for f in "$PRESET_DIR"/*.conf; do [[ -e $f ]] && basename "$f" .conf; done
+    exit 0 ;;
+  -h | --help) sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+  *) die "argumento desconocido: $1 (probá --help)" ;;
+  esac
+done
+
+# --- parametros ---------------------------------------------------------------
+# Orden de precedencia: preset < config de usuario < --param.
+declare -A params=()
+
+read_conf() {
+  local file=$1 line key value
+  [[ -r $file ]] || return 0
+  while IFS= read -r line || [[ -n $line ]]; do
+    line="${line%%#*}"
+    line="${line#"${line%%[![:space:]]*}"}"
+    line="${line%"${line##*[![:space:]]}"}"
+    [[ -z $line ]] && continue
+    [[ $line != *=* ]] && continue
+    key="${line%%=*}"; value="${line#*=}"
+    key="${key%"${key##*[![:space:]]}"}"
+    value="${value#"${value%%[![:space:]]*}"}"
+    params["$key"]="$value"
+  done <"$file"
+}
+
+# El preset pedido explicitamente gana; si no, el que diga la config del usuario.
+if [[ -z $preset ]]; then
+  preset_from_conf=$(sed -n 's/^[[:space:]]*version[[:space:]]*=[[:space:]]*\([^#[:space:]]*\).*/\1/p' "$USER_CONF" 2>/dev/null | tail -1)
+  preset="${preset_from_conf:-$DEFAULT_PRESET}"
+fi
+
+preset_file="$PRESET_DIR/$preset.conf"
+[[ -r $preset_file ]] || die "no existe el preset '$preset' ($preset_file). Disponibles: $(cd "$PRESET_DIR" && ls *.conf 2>/dev/null | sed 's/\.conf$//' | tr '\n' ' ')"
+
+read_conf "$preset_file"
+read_conf "$USER_CONF"
+for kv in ${extra_params+"${extra_params[@]}"}; do
+  [[ $kv == *=* ]] || die "--param espera clave=valor, no '$kv'"
+  params["${kv%%=*}"]="${kv#*=}"
+done
+
+urlencode() { local s=$1 o="" i c; for ((i = 0; i < ${#s}; i++)); do c=${s:i:1}
+  case $c in [a-zA-Z0-9.~_-]) o+=$c ;; *) printf -v c '%%%02X' "'$c"; o+=$c ;; esac; done; printf '%s' "$o"; }
+
+query=""
+for key in "${!params[@]}"; do
+  query+="&$(urlencode "$key")=$(urlencode "${params[$key]}")"
+done
+query="${query#&}"
+
+if ((print_url)); then
+  echo "preset: $preset"
+  echo "url:    http://127.0.0.1:<puerto>/${query:+?$query}"
+  exit 0
+fi
+
+# --- dependencias -------------------------------------------------------------
+[[ -d $VENDOR_DIR ]] || die "falta la copia vendorizada en $VENDOR_DIR"
+command -v python3 >/dev/null || die "hace falta python3 para el servidor local"
+
+browser=""
+for candidate in chromium google-chrome-stable google-chrome brave; do
+  if command -v "$candidate" >/dev/null; then browser=$(command -v "$candidate"); break; fi
+done
+[[ -n $browser ]] || die "hace falta Chromium (o Chrome/Brave): el render es WebGL y corre en un navegador"
+
+# --- limpieza -----------------------------------------------------------------
+declare -a browser_pids=()
+server_pid=""
+runtime_root="${XDG_RUNTIME_DIR:-/tmp}/matrix-screensaver.$$"
+
+cleanup() {
+  trap - EXIT INT TERM HUP QUIT
+  for pid in ${browser_pids+"${browser_pids[@]}"}; do kill "$pid" 2>/dev/null; done
+  [[ -n $server_pid ]] && kill "$server_pid" 2>/dev/null
+  hyprctl eval 'hl.config({ cursor = { invisible = false } })' &>/dev/null ||
+    hyprctl keyword cursor:invisible false &>/dev/null || true
+  rm -rf "$runtime_root"
+}
+trap cleanup EXIT INT TERM HUP QUIT
+
+# --- servidor -----------------------------------------------------------------
+mkdir -p "$runtime_root"
+exec {server_out}< <(exec "$HERE/matrix-screensaver-server" --root "$VENDOR_DIR" --overlay "$OVERLAY_DIR")
+server_pid=$!
+read -r -t 10 port <&$server_out || die "el servidor local no arranco"
+[[ $port =~ ^[0-9]+$ ]] || die "el servidor local devolvio un puerto invalido: '$port'"
+
+url="http://127.0.0.1:$port/"
+[[ -n $query ]] && url+="?$query"
+
+# --- ventanas -----------------------------------------------------------------
+hyprctl eval 'hl.config({ cursor = { invisible = true } })' &>/dev/null ||
+  hyprctl keyword cursor:invisible true &>/dev/null || true
+
+focused=$(hyprctl monitors -j | python3 -c 'import json,sys; print(next((m["name"] for m in json.load(sys.stdin) if m.get("focused")), ""))' 2>/dev/null)
+
+if [[ -n $only_monitor ]]; then
+  monitors=("$only_monitor")
+else
+  mapfile -t monitors < <(hyprctl monitors -j | python3 -c 'import json,sys; [print(m["name"]) for m in json.load(sys.stdin)]' 2>/dev/null)
+fi
+((${#monitors[@]})) || monitors=("")
+
+for monitor in "${monitors[@]}"; do
+  [[ -n $monitor ]] && { hyprctl dispatch "hl.dsp.focus({ monitor = \"$monitor\" })" >/dev/null 2>&1 ||
+    hyprctl dispatch focusmonitor "$monitor" >/dev/null 2>&1; }
+
+  # Un perfil por ventana: con --user-data-dir compartido la segunda invocacion
+  # le habla al proceso ya abierto y hereda su clase en vez de crear la suya.
+  profile="$runtime_root/profile-${monitor:-default}"
+  mkdir -p "$profile"
+
+  # --kiosk y no --app: en modo app Chromium ignora --class y deriva el app_id
+  # de la URL (chrome-127.0.0.1__-Default), con lo cual las windowrules de
+  # Omarchy para org.omarchy.screensaver no matchean. En kiosk si lo respeta.
+  "$browser" \
+    --user-data-dir="$profile" \
+    --class=org.omarchy.screensaver \
+    --kiosk "$url" \
+    --no-first-run --no-default-browser-check --no-service-autorun \
+    --disable-session-crashed-bubble --noerrdialogs --disable-infobars \
+    --ozone-platform-hint=auto \
+    &>/dev/null &
+  browser_pids+=($!)
+done
+
+[[ -n $focused && -z $only_monitor ]] && { hyprctl dispatch "hl.dsp.focus({ monitor = \"$focused\" })" >/dev/null 2>&1 ||
+  hyprctl dispatch focusmonitor "$focused" >/dev/null 2>&1; }
+
+# --- espera -------------------------------------------------------------------
+# Sale cuando overlay/exit.js avisa al servidor (input del usuario) o cuando se
+# cerraron todas las ventanas por otra via.
+while kill -0 "$server_pid" 2>/dev/null; do
+  alive=0
+  for pid in ${browser_pids+"${browser_pids[@]}"}; do kill -0 "$pid" 2>/dev/null && alive=1; done
+  ((alive)) || break
+  sleep 0.25
+done
