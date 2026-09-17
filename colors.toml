@@ -1,0 +1,38 @@
+# PLACEHOLDER — palette todavia sin definir.
+# Omarchy regenera desde acá: alacritty, foot, ghostty, kitty, btop, neovim,
+# hyprland, shell.toml, chromium, vscode, helix, keyboard.rgb.
+# Ver plantillas: /usr/share/omarchy/default/themed/*.tpl
+
+mode = "dark"
+
+accent = "#00ff41"
+selection = "#003b00"
+muted = "#1b3a1b"
+
+background = "#000000"
+dark_background = "#000000"
+darker_background = "#000000"
+lighter_background = "#0a140a"
+
+foreground = "#00ff41"
+dark_foreground = "#008f11"
+light_foreground = "#3ff56f"
+bright_foreground = "#c8ffd4"
+
+hyprland_active_border = "rgba(00ff41ee) rgba(008f11ee) 45deg"
+
+red = "#00c832"
+yellow = "#5aff6e"
+orange = "#2fe04a"
+green = "#00ff41"
+cyan = "#4dffa3"
+blue = "#00b34d"
+magenta = "#3ddb7a"
+brown = "#0b5c1c"
+
+bright_red = "#4dff77"
+bright_yellow = "#9dffaa"
+bright_green = "#7bff95"
+bright_cyan = "#a8ffd0"
+bright_blue = "#5affa0"
+bright_magenta = "#8bffb4"

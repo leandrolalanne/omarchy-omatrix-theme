@@ -1,0 +1,10 @@
+# Scratch / build output
+*.bak
+*.bak.*
+*.tmp
+/build/
+/dist/
+
+# OS noise
+.DS_Store
+Thumbs.db
