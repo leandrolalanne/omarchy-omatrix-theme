@@ -18,9 +18,11 @@ set -uo pipefail
 
 HERE="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SCREENSAVER_DIR="$(dirname -- "$HERE")"
-VENDOR_DIR="$SCREENSAVER_DIR/vendor/matrix"
+THEME_DIR="$(dirname -- "$SCREENSAVER_DIR")"
+VENDOR_DIR="$THEME_DIR/vendor/matrix"
 OVERLAY_DIR="$SCREENSAVER_DIR/overlay"
-PRESET_DIR="$SCREENSAVER_DIR/presets"
+PRESET_DIR="$THEME_DIR/presets"
+SERVE_BIN="$THEME_DIR/bin/matrix-serve"
 USER_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/omarchy/matrix-screensaver.conf"
 
 DEFAULT_PRESET=operator
@@ -125,7 +127,7 @@ trap cleanup EXIT INT TERM HUP QUIT
 
 # --- servidor -----------------------------------------------------------------
 mkdir -p "$runtime_root"
-exec {server_out}< <(exec "$HERE/matrix-screensaver-server" --root "$VENDOR_DIR" --overlay "$OVERLAY_DIR")
+exec {server_out}< <(exec "$SERVE_BIN" --root "$VENDOR_DIR" --overlay "$OVERLAY_DIR")
 server_pid=$!
 read -r -t 10 port <&$server_out || die "el servidor local no arranco"
 [[ $port =~ ^[0-9]+$ ]] || die "el servidor local devolvio un puerto invalido: '$port'"

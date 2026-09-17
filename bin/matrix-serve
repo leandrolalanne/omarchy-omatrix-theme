@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+"""CLI del servidor local. Escribe el puerto elegido en stdout y se queda vivo.
+
+Lo usa el launcher del screensaver (bash). El fondo importa lib/matrix_serve
+directamente en vez de lanzar este proceso.
+"""
+
+import argparse
+import sys
+import threading
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))
+import matrix_serve  # noqa: E402
+
+stop = threading.Event()
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--root", required=True, help="directorio vendor/matrix")
+    ap.add_argument("--overlay", help="directorio overlay/ a inyectar (opcional)")
+    ap.add_argument("--port", type=int, default=0, help="0 = puerto libre al azar")
+    args = ap.parse_args()
+
+    def on_exit(reason):
+        print(f"exit: {reason}", file=sys.stderr, flush=True)
+        stop.set()
+
+    def on_ready():
+        print("ready: overlay inyectado", file=sys.stderr, flush=True)
+
+    try:
+        httpd, port = matrix_serve.serve(args.root, args.overlay, args.port, on_exit, on_ready)
+    except (NotADirectoryError, OSError) as err:
+        sys.exit(f"matrix-serve: {err}")
+
+    print(port, flush=True)
+    try:
+        stop.wait()
+    except KeyboardInterrupt:
+        pass
+    httpd.shutdown()
+
+
+if __name__ == "__main__":
+    main()
