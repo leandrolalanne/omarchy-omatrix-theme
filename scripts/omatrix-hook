@@ -75,6 +75,23 @@ write_font() {
 
 # Put back what another theme's hook truncated. The staged copy is what
 # ~/.config/ghostty/config includes, and the theme folder is where ours lives.
+# The screensaver's terminal inherits the user's whole ghostty config chain,
+# translucency included -- verified by reading the config files it loads. A
+# screensaver has to cover what is behind it, so this hands it a file that turns
+# that back off. It has to be a config file: ghostty ignores
+# --background-opacity on the command line (measured: 0.2 and 1.0 render
+# identically), while a --config-file is honoured.
+write_screensaver_conf() {
+    local dir="$HOME/.local/state/omatrix"
+    mkdir -p "$dir" || return 0
+    cat > "$dir/screensaver.conf" <<CONF
+# Loaded only by the screensaver, through the ghostty shim. The theme's own
+# ghostty-extra.conf makes terminals translucent; a screensaver must not be.
+background-opacity = 1
+CONF
+    return 0
+}
+
 # The second screensaver: the lines from Neo's monitor, with the login name in
 # place of his. Written at theme-set rather than read at render time, because
 # the shim that shows it runs inside the screensaver, where a failure is a black
@@ -130,6 +147,7 @@ case "${theme_name,,}" in
     restore_ghostty_extra
     swap_branding on
     write_wakeup
+    write_screensaver_conf
     # The decoration this theme wants is declared in hyprland.lua, and the other
     # hooks overwrote it at runtime after that file was loaded. Reload rather
     # than re-assert: a reload reapplies whatever the active theme declares, so

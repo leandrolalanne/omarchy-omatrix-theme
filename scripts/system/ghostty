@@ -45,10 +45,23 @@ printf '%s' "$pick" >"$state" 2>/dev/null
 
 [[ $pick == wake ]] && size=16 || size=9
 
-args=()
+# The screensaver's terminal reads the user's whole config chain, so it inherits
+# the theme's translucency. A screensaver has to cover what is behind it. This
+# has to be a config file rather than --background-opacity: ghostty ignores that
+# one on the command line -- measured, 0.2 and 1.0 render identically -- while a
+# later --config-file overrides an earlier one.
+conf="$HOME/.local/state/omatrix/screensaver.conf"
+
+args=(); placed=
 for a in "$@"; do
   [[ $a == --font-size=* ]] && a="--font-size=$size"
+  # Everything after -e is the command ghostty runs, so the flag goes BEFORE it
+  # or it ends up as an argument to omarchy-screensaver instead.
+  if [[ $a == -e && -z $placed && -f $conf ]]; then
+    args+=("--config-file=$conf"); placed=1
+  fi
   args+=("$a")
 done
+[[ -z $placed && -f $conf ]] && args+=("--config-file=$conf")
 
 exec env OMATRIX_SCREENSAVER="$pick" /usr/bin/ghostty "${args[@]}"
