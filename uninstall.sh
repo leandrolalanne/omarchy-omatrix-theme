@@ -15,7 +15,7 @@ for link in "$CONFIG/omarchy/themes/$SLUG" "$CONFIG/omarchy/plugins/$PLUGIN_ID";
   rm -f "$link"; echo "removed $link"; removed=1
 done
 
-for f in "$CONFIG/omarchy/hooks/theme-set.d/$SLUG"; do
+for f in "$CONFIG/omarchy/hooks/theme-set.d/$SLUG" "$CONFIG/omarchy/hooks/post-boot.d/$SLUG"; do
   [[ -e $f ]] || continue
   rm -f "$f"; echo "removed $f"; removed=1
 done

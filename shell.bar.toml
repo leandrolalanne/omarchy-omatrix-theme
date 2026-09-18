@@ -9,15 +9,15 @@
 # palette and this needs the same change by hand.
 #
 #   background  = background        #070a0b
-#   text        = foreground        #b0fa9e     9.14:1 at this alpha
-#   active      = accent            #89f76e     8.37:1
+#   text        = foreground        #b0fa9e    12.89:1 at this alpha
+#   active      = accent            #89f76e    11.81:1
 #
 # `active` is the accent rather than the template's `red`, because in this
 # theme red is #398e24 -- a dim green, which is the wrong thing to attract
 # attention with. The accent is the brightest colour the palette has.
 [bar]
 background       = "#070a0b"
-background-alpha = 0.80
+background-alpha = 0.90
 text             = "#b0fa9e"
 active           = "#89f76e"
 scale-with-font  = true

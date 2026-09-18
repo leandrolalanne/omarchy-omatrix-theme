@@ -1,3 +1,5 @@
 #!/bin/bash
-# Omarchy passes the slug of the newly selected theme as $1.
-exec "$HOME/.config/omarchy/themes/omatrix/scripts/omatrix-font" "${1:-}"
+# Omarchy passes the slug of the newly selected theme as $1. The script reads
+# the state file anyway: theme-set does not serialise the hook chain, so a $1
+# can be stale when two switches overlap.
+exec "$HOME/.config/omarchy/themes/omatrix/scripts/omatrix-hook" "${1:-}"

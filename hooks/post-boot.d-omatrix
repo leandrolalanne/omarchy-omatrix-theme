@@ -1,0 +1,5 @@
+#!/bin/bash
+# On post-boot there is no slug argument, so the script reads the active theme
+# from the state file. Needed here too: the hooks that truncate
+# ghostty-extra.conf also run at boot.
+exec "$HOME/.config/omarchy/themes/omatrix/scripts/omatrix-hook" "${1:-}"

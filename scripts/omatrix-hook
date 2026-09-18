@@ -1,6 +1,17 @@
 #!/bin/bash
-# Set the film's terminal typeface while omatrix is active, and put the previous
-# one back on the way out.
+# Everything omatrix has to (re)assert after a theme change, in one hook.
+#
+# TWO jobs, and the second one is not optional:
+#
+# 1. The font. `omarchy font set` is global and permanent -- it has no notion of
+#    a theme -- so this is what makes it behave as though it belonged to omatrix.
+#
+# 2. ghostty-extra.conf. Other themes ship hooks whose `else` branch runs for
+#    every theme that is not their own; ayaka-smoky's truncates that file and
+#    forces blur off and rounding 0. Hooks run alphabetically and ayaka sorts
+#    before omatrix, so it fires first and this puts the file back. Without
+#    this, the terminal's translucency is silently reverted every time the
+#    theme is applied -- it looks like the setting never worked.
 #
 # `omarchy font set` is global and permanent -- it has no notion of a theme --
 # so this hook is what makes it behave as though the font belonged to omatrix.
@@ -56,9 +67,26 @@ write_font() {
   omarchy restart terminal >/dev/null 2>&1 || true
 }
 
+# Put back what another theme's hook truncated. The staged copy is what
+# ~/.config/ghostty/config includes, and the theme folder is where ours lives.
+restore_ghostty_extra() {
+  local src="$HOME/.config/omarchy/themes/omatrix/ghostty-extra.conf"
+  local dst="$HOME/.local/state/omarchy/current/theme/ghostty-extra.conf"
+  [[ -f $src ]] || return 0
+  cmp -s "$src" "$dst" 2>/dev/null && return 0
+  cp "$src" "$dst" && pkill -SIGUSR2 ghostty 2>/dev/null
+  return 0
+}
+
 case "${theme_name,,}" in
   omatrix)
-    # Already there: do not rewrite configs or restart the shell for nothing.
+    restore_ghostty_extra
+    # This theme declares its own decoration in hyprland.lua, but that file was
+    # loaded before the other hooks ran, so re-assert it rather than trust it.
+    hyprctl eval 'hl.config({ decoration = { rounding = 10, blur = { enabled = false } } })' >/dev/null 2>&1
+
+    # Already on the font: do not rewrite configs or restart the shell for
+    # nothing. The restore above still has to happen every time.
     [[ $current_font == "$theme_font" ]] && exit 0
     write_font "$theme_font" "$theme_size"
     ;;

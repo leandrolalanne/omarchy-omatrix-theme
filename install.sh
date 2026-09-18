@@ -28,10 +28,17 @@ mkdir -p "$THEMES"
 ln -sfn "$SRC" "$THEMES/$SLUG"
 echo "linked   $THEMES/$SLUG"
 
-# --- the font hook ---
-mkdir -p "$HOOKS"
+# --- the hook, on both chains ---
+# theme-set.d for switching, post-boot.d because the hooks that truncate
+# ghostty-extra.conf run at boot as well. The name matters: hooks run
+# alphabetically and this has to sort AFTER the ones it repairs after
+# (ayaka-smoky, liquid-glass-material).
+BOOT_HOOKS="$CONFIG/omarchy/hooks/post-boot.d"
+mkdir -p "$HOOKS" "$BOOT_HOOKS"
 install -m 755 "$SRC/hooks/theme-set.d-omatrix" "$HOOKS/$SLUG"
+install -m 755 "$SRC/hooks/post-boot.d-omatrix" "$BOOT_HOOKS/$SLUG"
 echo "linked   $HOOKS/$SLUG"
+echo "linked   $BOOT_HOOKS/$SLUG"
 
 # --- the background machinery ---
 mkdir -p "$PLUGINS"
