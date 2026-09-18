@@ -4,37 +4,43 @@ Tema estilo *The Matrix* para [Omarchy](https://omarchy.org/).
 
 Slug al instalar: **`matrix`** (`omarchy theme install` quita `omarchy-` y `-theme`).
 
-```bash
-omarchy theme install <git-url>
-omarchy theme set matrix
-```
+## Estado: estructura, esperando
+
+Este repo arranco siendo una implementacion completa sobre
+[Rezmason/matrix](https://github.com/Rezmason/matrix) corriendo en WebGL:
+screensaver en Chromium kiosk y fondo animado en WebKit sobre layer-shell.
+Funcionaba, y costaba **~880 MB de RAM y ~35% de un core** con dos monitores,
+porque cada pantalla levantaba un proceso WebKit completo.
+
+Esa implementacion **se retiro**. El efecto se convirtio en un proyecto propio:
+
+> **[omarchy-matrix-rain](../omarchy-matrix-rain)** — la lluvia portada a un
+> shader nativo de Qt Quick. Un solo `ShaderEffect` en vez de los cuatro
+> ping-pong buffers del original, con bloom de 5 niveles y modelo de layout de
+> terminal (el cuerpo en puntos manda, la ventana decide cuantas columnas entran).
+
+De ahi va a salir todo lo que vuelva aca: screensaver, fondo, generacion de arte.
+Este repo queda como la estructura que se completa **despues**, cuando ese
+proyecto este terminado.
+
+El historial esta intacto: la implementacion WebGL se puede recuperar de git
+en cualquier momento.
 
 ## Estructura
 
-| Ruta             | Qué va acá |
-|------------------|------------|
-| `colors.toml`    | Paleta única. Omarchy genera desde acá los configs de terminal, btop, neovim, hyprland, shell, chromium, vscode. **Placeholder por ahora.** |
-| `screensaver/`   | Screensaver del tema. **Punto de partida — en desarrollo.** |
-| `branding/`      | Assets de branding (`screensaver.txt` y demás ASCII art). |
-| `backgrounds/`   | Wallpapers del tema. |
-| `scripts/`       | `install.sh` / `uninstall.sh` y utilidades. |
-| `docs/`          | Notas de diseño y documentación. |
+| | |
+|---|---|
+| `colors.toml` | la paleta. **Todavia placeholder** |
+| `backgrounds/` | wallpapers del tema |
+| `branding/` | ASCII art y assets de branding |
+| `scripts/` | instalador y utilidades |
+| `docs/` | notas de diseño |
 
-Archivos de tema todavía no creados: `icons.theme`, `neovim.lua`, `vscode.json`,
-`preview.png`, `preview-unlock.png`, `unlock.png`, `shell.*.toml`.
+## Pendiente
 
-## Nota sobre themes clonados
-
-Omarchy descarta de un tema clonado por git todo lo que ejecuta código
-(`*.lua`, `alacritty.toml`, `foot.ini`, `ghostty.conf`, `kitty.conf`,
-`vscode.json`) y lo regenera desde `colors.toml`. Se conservan `btop.theme`,
-`chromium.theme`, `helix.toml`, `icons.theme`, `keyboard.rgb` y `shell.toml`.
-
-## Estado
-
-- [ ] Screensaver
-- [ ] Paleta definitiva
-- [ ] Backgrounds
-- [ ] Previews / unlock
-- [ ] Shell (bar, launcher, menu, notifications)
-- [ ] install.sh / uninstall.sh
+- **La paleta.** Decision abierta sobre de que verde derivarla: el `operator` de
+  Rezmason (hue 144, de investigacion sobre transfers de home video), la paleta
+  popular `#00FF41` (~135, fan-made y con los hues inconsistentes), o muestrear
+  un frame de la pelicula. No existe un color oficial declarado por el estudio.
+- Lo que aporte `omarchy-matrix-rain` una vez empaquetado como plugin.
+- Backgrounds, previews y unlock.
