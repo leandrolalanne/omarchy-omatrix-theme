@@ -35,7 +35,21 @@ for a in "$@"; do
   [[ $a == --random-effect ]] || args+=("$a")
 done
 
+# The rain falls in the film's own glyphs, not ttfx's default halfwidth
+# katakana. These are Matrix-Code.ttf's 56 codepoints shifted into plane 16 by
+# MatrixCodeTerminal.ttf -- the same trick redpill uses, and for the same
+# reason: plane 16 is empty, so the font can sit in a chain without ever
+# supplying a character anyone types.
+#
+# It works here because the screensaver's terminal reads the user's ghostty
+# config before its own -- verified by reading the font list it loads -- so
+# ~/.config/ghostty/matrix-rain.conf is already in its chain.
+#
+# Regenerate with: tools/make-rain-symbols.py
+RAIN_SYMBOLS="􀀢 􀀪 􀀫 􀀰 􀀱 􀀲 􀀳 􀀴 􀀵 􀀷 􀀸 􀀹 􀀺 􀀼 􀀾 􀁺 􀁼 􀂦 􀂩 􂕌 􂖪 􃂢 􃂦 􃂨 􃂪 􃂫 􃂭 􃂱 􃂳 􃂵 􃂷 􃂹 􃂻 􃂽 􃂿 􃃄 􃃆 􃃊 􃃋 􃃌 􃃍 􃃏 􃃒 􃃛 􃃞 􃃟 􃃠 􃃡 􃃢 􃃤 􃃨 􃃩 􃃪 􃃯 􃃼 􊞊"
+
 exec /usr/bin/ttfx "${args[@]}" matrix \
+  --rain-symbols $RAIN_SYMBOLS \
   --rain-color-gradient 185318 89f76e \
   --highlight-color d9ffff \
   --final-gradient-stops 176105 89f76e b0fa9e
