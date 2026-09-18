@@ -1,46 +1,47 @@
 # omarchy-matrix-theme
 
-Tema estilo *The Matrix* para [Omarchy](https://omarchy.org/).
+A *Matrix*-styled theme for [Omarchy](https://omarchy.org/).
 
-Slug al instalar: **`matrix`** (`omarchy theme install` quita `omarchy-` y `-theme`).
+Slug on install: **`matrix`** (`omarchy theme install` strips the `omarchy-`
+prefix and the `-theme` suffix).
 
-## Estado: estructura, esperando
+## Status: a structure, waiting
 
-Este repo arranco siendo una implementacion completa sobre
-[Rezmason/matrix](https://github.com/Rezmason/matrix) corriendo en WebGL:
-screensaver en Chromium kiosk y fondo animado en WebKit sobre layer-shell.
-Funcionaba, y costaba **~880 MB de RAM y ~35% de un core** con dos monitores,
-porque cada pantalla levantaba un proceso WebKit completo.
+This repo started out as a complete implementation on top of
+[Rezmason/matrix](https://github.com/Rezmason/matrix) running in WebGL: a
+screensaver in a Chromium kiosk and an animated background in WebKit on a
+layer-shell surface. It worked, and it cost **~880 MB of RAM and ~35% of one
+core** with two monitors, because every screen brought up a full WebKit process.
 
-Esa implementacion **se retiro**. El efecto se convirtio en un proyecto propio:
+That implementation has been **retired**. The effect became a project of its own:
 
-> **[omarchy-matrix-rain](../omarchy-matrix-rain)** — la lluvia portada a un
-> shader nativo de Qt Quick. Un solo `ShaderEffect` en vez de los cuatro
-> ping-pong buffers del original, con bloom de 5 niveles y modelo de layout de
-> terminal (el cuerpo en puntos manda, la ventana decide cuantas columnas entran).
+> **[omarchy-matrix-rain](../omarchy-matrix-rain)** — the rain ported to a native
+> Qt Quick shader. A single `ShaderEffect` instead of upstream's four ping-pong
+> buffers, with a 5-level bloom and a terminal layout model (point size drives
+> the cell, the window decides how many columns fit).
 
-De ahi va a salir todo lo que vuelva aca: screensaver, fondo, generacion de arte.
-Este repo queda como la estructura que se completa **despues**, cuando ese
-proyecto este terminado.
+Everything that comes back here will come from there: screensaver, background,
+generated art. This repo stays as the structure to be filled in **later**, once
+that project is done.
 
-El historial esta intacto: la implementacion WebGL se puede recuperar de git
-en cualquier momento.
+The history is intact: the WebGL implementation can be recovered from git at any
+time.
 
-## Estructura
+## Structure
 
 | | |
 |---|---|
-| `colors.toml` | la paleta. **Todavia placeholder** |
-| `backgrounds/` | wallpapers del tema |
-| `branding/` | ASCII art y assets de branding |
-| `scripts/` | instalador y utilidades |
-| `docs/` | notas de diseño |
+| `colors.toml` | the palette. **Still a placeholder** |
+| `backgrounds/` | the theme's wallpapers |
+| `branding/` | ASCII art and branding assets |
+| `scripts/` | installer and utilities |
+| `docs/` | design notes |
 
-## Pendiente
+## Still to do
 
-- **La paleta.** Decision abierta sobre de que verde derivarla: el `operator` de
-  Rezmason (hue 144, de investigacion sobre transfers de home video), la paleta
-  popular `#00FF41` (~135, fan-made y con los hues inconsistentes), o muestrear
-  un frame de la pelicula. No existe un color oficial declarado por el estudio.
-- Lo que aporte `omarchy-matrix-rain` una vez empaquetado como plugin.
-- Backgrounds, previews y unlock.
+- **The palette.** Open question about which green to derive it from: Rezmason's
+  `operator` (hue 144, from reference work on home video transfers), the popular
+  `#00FF41` palette (~135, fan-made and with inconsistent hues), or sampling a
+  frame of the film. There is no officially declared studio color.
+- Whatever `omarchy-matrix-rain` contributes once it is packaged as a plugin.
+- Backgrounds, previews and the unlock image.

@@ -1,7 +1,7 @@
-# PLACEHOLDER — palette todavia sin definir.
-# Omarchy regenera desde acá: alacritty, foot, ghostty, kitty, btop, neovim,
-# hyprland, shell.toml, chromium, vscode, helix, keyboard.rgb.
-# Ver plantillas: /usr/share/omarchy/default/themed/*.tpl
+# PLACEHOLDER - the palette is not decided yet.
+# Omarchy regenerates these from here: alacritty, foot, ghostty, kitty, btop,
+# neovim, hyprland, shell.toml, chromium, vscode, helix, keyboard.rgb.
+# Templates: /usr/share/omarchy/default/themed/*.tpl
 
 mode = "dark"
 
