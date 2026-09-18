@@ -1,0 +1,25 @@
+# The bar, at the terminal's translucency.
+#
+# A shell.<section>.toml REPLACES that section of the generated shell.toml
+# wholesale -- it is not merged key by key -- so every key the template defines
+# has to be here, not just the one being changed.
+#
+# That also means these colours are literal copies of colors.toml rather than
+# references: this file is not run through the template engine. Change the
+# palette and this needs the same change by hand.
+#
+#   background  = background        #070a0b
+#   text        = foreground        #b0fa9e     9.14:1 at this alpha
+#   active      = accent            #89f76e     8.37:1
+#
+# `active` is the accent rather than the template's `red`, because in this
+# theme red is #398e24 -- a dim green, which is the wrong thing to attract
+# attention with. The accent is the brightest colour the palette has.
+[bar]
+background       = "#070a0b"
+background-alpha = 0.80
+text             = "#b0fa9e"
+active           = "#89f76e"
+scale-with-font  = true
+size-horizontal  = 26
+size-vertical    = 28
