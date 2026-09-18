@@ -1,0 +1,39 @@
+#!/bin/bash
+# Set the screensaver's point size while omatrix is active.
+#
+# omarchy-launch-screensaver hardcodes `--font-size=18`, and a command line
+# argument beats every config file, so there is no way to set it from the theme.
+# The launcher itself cannot be shimmed: Omarchy's own bin directory sits at
+# position 11 in the login PATH, ahead of /usr/local/bin at 13. ghostty has no
+# copy there and lives only in /usr/bin at 14, so this is the one point that
+# works -- the same reason the effect is pinned by shimming ttfx.
+#
+# THIS SHADOWS ghostty FOR EVERYTHING, so it is built to be impossible to fail
+# open: every branch ends in `exec /usr/bin/ghostty`, and the rewrite happens
+# only when the invocation is unmistakably the screensaver's AND omatrix is the
+# current theme. Any other terminal you open passes through untouched.
+#
+# 9 pt because that is the size the rest of the project renders at: it is the
+# film's own, and what matrix-rain and redpill both default to.
+
+want=
+for a in "$@"; do
+  [[ $a == --class=org.omarchy.screensaver ]] && want=1
+done
+
+if [[ -z $want ]]; then
+  exec /usr/bin/ghostty "$@"
+fi
+
+theme=$(cat "$HOME/.local/state/omarchy/current/theme.name" 2>/dev/null)
+if [[ ${theme,,} != omatrix ]]; then
+  exec /usr/bin/ghostty "$@"
+fi
+
+args=()
+for a in "$@"; do
+  [[ $a == --font-size=* ]] && a="--font-size=9"
+  args+=("$a")
+done
+
+exec /usr/bin/ghostty "${args[@]}"
