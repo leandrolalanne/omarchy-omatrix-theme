@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "lean.omatrix",
+  "name": "Matrix rain background",
+  "version": "0.1.0",
+  "author": "Leandro Lalanne",
+  "license": "MIT",
+  "description": "Renders the live digital rain as the desktop background when a .live. wallpaper is selected. Machinery only: the rain itself comes from the matrix-rain provider.",
+  "kinds": ["service"],
+  "keepLoaded": true,
+  "entryPoints": { "service": "Service.qml" }
+}
