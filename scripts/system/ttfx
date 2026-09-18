@@ -1,0 +1,41 @@
+#!/bin/bash
+# Pin Omarchy's screensaver to the matrix effect while omatrix is active.
+#
+# Omarchy's screensaver hardcodes `--random-effect`, so it lands on fireworks or
+# bouncy balls as often as on the rain, and there is no option for it: the flag
+# is written into the script.
+#
+# This intercepts `ttfx` rather than the screensaver, and the reason is the
+# PATH. Omarchy puts its own bin at position 11, ahead of /usr/local/bin at 13,
+# so a shim for omarchy-screensaver is never reached -- measured, after trying
+# exactly that. ttfx has no such copy: it exists only in /usr/bin at 14, which
+# /usr/local/bin does precede. So this is the one interception point that works.
+#
+# Inert unless BOTH conditions hold: omatrix is the current theme, and the
+# caller asked for a random effect. Every other ttfx call on the system passes
+# straight through, which matters because this shadows ttfx for everything.
+
+for a in "$@"; do
+  [[ $a == --random-effect ]] && random=1
+done
+
+theme=$(cat "$HOME/.local/state/omarchy/current/theme.name" 2>/dev/null)
+
+if [[ ${random:-} != 1 || ${theme,,} != omatrix ]]; then
+  exec /usr/bin/ttfx "$@"
+fi
+
+# Drop the flag and ask for the effect by name. ttfx takes the effect as a
+# subcommand after the global options, so it is appended, not substituted.
+# The greens are the ones the rest of the theme uses, measured off the rain:
+#   176105 the dark end of the ramp, 89f76e its bright end, b0fa9e the pale top,
+#   d9ffff the leading glyph of a falling drop.
+args=()
+for a in "$@"; do
+  [[ $a == --random-effect ]] || args+=("$a")
+done
+
+exec /usr/bin/ttfx "${args[@]}" matrix \
+  --rain-color-gradient 185318 89f76e \
+  --highlight-color d9ffff \
+  --final-gradient-stops 176105 89f76e b0fa9e
