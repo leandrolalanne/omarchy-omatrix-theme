@@ -35,21 +35,42 @@ fi
 WAKEUP="$HOME/.local/state/omatrix/wakeup.txt"
 
 if [[ ${OMATRIX_SCREENSAVER:-} == wake && -s $WAKEUP ]]; then
-  # The input file is swapped as well as the effect. -i carries its path in the
-  # NEXT argument, so the two are replaced together.
-  args=(); skip=
-  for a in "$@"; do
-    if [[ -n $skip ]]; then skip=; args+=("$WAKEUP"); continue; fi
-    [[ $a == --random-effect ]] && continue
-    [[ $a == -i ]] && skip=1
-    args+=("$a")
+  # ttfx cannot do this one: it renders a whole file once, with no way to hold a
+  # line, erase it and move to the next. So the typing happens here.
+  #
+  # This works because this shim IS a bash script called `ttfx`, which means its
+  # comm is "ttfx" -- and omarchy-screensaver watches its effect with
+  # `pgrep -t <tty> -x ttfx`, exiting the moment that returns nothing. Delegating
+  # to python or any differently named helper would make that watch fail and the
+  # screensaver would respawn in a tight loop.
+
+  GREEN=$'\033[38;2;137;247;110m'   # the accent, the same green as the palette
+  RESET=$'\033[0m'
+  HOME_POS=$'\033[2J\033[3;4H'      # clear, then a small margin from the top left
+  CURSOR_ON=$'\033[?25l'            # the block below is drawn, not the real cursor
+
+  mapfile -t LINES < "$WAKEUP"
+  printf '%s%s' "$CURSOR_ON" "$GREEN"
+
+  while true; do
+    for line in "${LINES[@]}"; do
+      printf '%s' "$HOME_POS"
+      # Character by character, with a little jitter so it reads as typed by a
+      # hand rather than played back by a machine.
+      for ((i = 0; i < ${#line}; i++)); do
+        printf '%s' "${line:i:1}"
+        # printf, not "0.0$n": that form only holds while n has two digits and
+        # silently becomes ten times faster at three.
+        sleep "$(printf '0.%03d' $((95 + RANDOM % 75)))"
+      done
+      # Hold, with the block cursor blinking after the line the way it does on
+      # Neo's monitor.
+      for ((b = 0; b < 6; b++)); do
+        printf '\u2588'; sleep 0.28
+        printf '\b \b'; sleep 0.28
+      done
+    done
   done
-  # `print` walks a visible print head down the lines, carriage return and all,
-  # which is the typewriter on Neo's monitor. One colour rather than a gradient:
-  # the film's is flat green.
-  exec /usr/bin/ttfx "${args[@]}" print \
-    --print-speed 1 \
-    --final-gradient-stops 89f76e
 fi
 
 args=()
