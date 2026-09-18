@@ -14,6 +14,11 @@
 # for terminals full of rain, not a statement of their own; the default
 # wallpaper is chosen on the same principle.
 #
+# dark_foreground and muted are further up the ramp than the rain's own stops.
+# That is the terminal's translucency paying for itself: at 0.80 opacity the
+# dimmest text is what runs out of contrast first, so those two are set from the
+# alpha rather than the other way round. See ghostty-extra.conf.
+#
 # The ANSI slots are monochrome on purpose: everything lives inside the green
 # family, the way an operator's screen does. That costs legibility where colour
 # carries meaning -- in a diff, red and green land on the same hue -- and it is
@@ -26,7 +31,7 @@ accent = "#89f76e"
 selection = "#143a0c"
 selection_background = "#143a0c"
 selection_foreground = "#d9ffff"
-muted = "#34861f"
+muted = "#3d9926"
 
 background = "#070a0b"
 dark_background = "#040607"
@@ -34,12 +39,12 @@ darker_background = "#020304"
 lighter_background = "#0e1315"
 
 foreground = "#b0fa9e"
-dark_foreground = "#4aa434"
+dark_foreground = "#61c249"
 light_foreground = "#9cf886"
 bright_foreground = "#d9ffff"
 
-hyprland_active_border = "rgba(89f76eee) rgba(4aa434ee) 45deg"
-hyprland_inactive_border = "rgba(34861f66)"
+hyprland_active_border = "rgba(89f76eee) rgba(61c249ee) 45deg"
+hyprland_inactive_border = "rgba(3d992666)"
 
 red = "#398e24"
 yellow = "#9ef988"
