@@ -6,7 +6,13 @@
 # 1. The font. `omarchy font set` is global and permanent -- it has no notion of
 #    a theme -- so this is what makes it behave as though it belonged to omatrix.
 #
-# 2. ghostty-extra.conf. Other themes ship hooks whose `else` branch runs for
+# 2. The screensaver wordmark. Omarchy's screensaver is not a graphical program:
+#    it runs `ttfx` over ~/.config/omarchy/branding/screensaver.txt, so the
+#    screensaver IS that file. Swapped in on the way in, and the original put
+#    back on the way out -- the first swap keeps a copy, so what is restored is
+#    whatever was there before omatrix, not an assumption about it.
+#
+# 3. ghostty-extra.conf. Other themes ship hooks whose `else` branch runs for
 #    every theme that is not their own; ayaka-smoky's truncates that file and
 #    forces blur off and rounding 0. Hooks run alphabetically and ayaka sorts
 #    before omatrix, so it fires first and this puts the file back. Without
@@ -69,6 +75,28 @@ write_font() {
 
 # Put back what another theme's hook truncated. The staged copy is what
 # ~/.config/ghostty/config includes, and the theme folder is where ours lives.
+# Omarchy's screensaver reads one file, so the wordmark is the screensaver.
+# The .pre-omatrix copy is written once and never overwritten: switching themes
+# twice must not end up saving our own logo as "the original".
+swap_branding() {
+    local ours="$HOME/.config/omarchy/themes/omatrix/branding/screensaver.txt"
+    local live="$HOME/.config/omarchy/branding/screensaver.txt"
+    local saved="$live.pre-omatrix"
+
+    case "$1" in
+      on)
+        [[ -f $ours ]] || return 0
+        [[ -f $saved || ! -f $live ]] || cp "$live" "$saved"
+        cmp -s "$ours" "$live" 2>/dev/null || cp "$ours" "$live"
+        ;;
+      off)
+        [[ -f $saved ]] || return 0
+        cp "$saved" "$live" && rm -f "$saved"
+        ;;
+    esac
+    return 0
+}
+
 restore_ghostty_extra() {
   local src="$HOME/.config/omarchy/themes/omatrix/ghostty-extra.conf"
   local dst="$HOME/.local/state/omarchy/current/theme/ghostty-extra.conf"
@@ -81,6 +109,7 @@ restore_ghostty_extra() {
 case "${theme_name,,}" in
   omatrix)
     restore_ghostty_extra
+    swap_branding on
     # The decoration this theme wants is declared in hyprland.lua, and the other
     # hooks overwrote it at runtime after that file was loaded. Reload rather
     # than re-assert: a reload reapplies whatever the active theme declares, so
@@ -96,6 +125,7 @@ case "${theme_name,,}" in
   *)
     # Only step in when leaving OUR font behind. If the user picked something
     # else by hand, a theme change has no business overriding it.
+    swap_branding off
     [[ $current_font == "$theme_font" ]] || exit 0
     write_font "$fallback_font" "$fallback_size"
     ;;

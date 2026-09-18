@@ -20,6 +20,14 @@ for f in "$CONFIG/omarchy/hooks/theme-set.d/$SLUG" "$CONFIG/omarchy/hooks/post-b
   rm -f "$f"; echo "removed $f"; removed=1
 done
 
+# The hook keeps a copy of whatever branding was there before omatrix. If it
+# is still around, omatrix never handed it back -- do it here.
+SAVED="$CONFIG/omarchy/branding/screensaver.txt.pre-omatrix"
+if [[ -f $SAVED ]]; then
+  cp "$SAVED" "$CONFIG/omarchy/branding/screensaver.txt" && rm -f "$SAVED"
+  echo "restored $CONFIG/omarchy/branding/screensaver.txt"; removed=1
+fi
+
 BGDIR="$CONFIG/omarchy/backgrounds/$SLUG"
 if [[ -d $BGDIR ]]; then
   rm -rf "$BGDIR"; echo "removed $BGDIR"; removed=1
