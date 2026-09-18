@@ -49,11 +49,15 @@ if [[ ${OMATRIX_SCREENSAVER:-} == wake && -s $WAKEUP ]]; then
   HOME_POS=$'\033[2J\033[3;4H'      # clear, then a small margin from the top left
   CURSOR_ON=$'\033[?25l'            # the block below is drawn, not the real cursor
 
-  mapfile -t LINES < "$WAKEUP"
+  # NOT `LINES`: that is a bash special. Bash rewrites it with the terminal
+  # height after every command, which overwrites element 0 of an array by that
+  # name -- so the first phrase turned into the row count on the second loop
+  # while the rest survived.
+  mapfile -t PHRASES < "$WAKEUP"
   printf '%s%s' "$CURSOR_ON" "$GREEN"
 
   while true; do
-    for line in "${LINES[@]}"; do
+    for line in "${PHRASES[@]}"; do
       printf '%s' "$HOME_POS"
       # Character by character, with a little jitter so it reads as typed by a
       # hand rather than played back by a machine.
