@@ -34,6 +34,13 @@ hl.config({
   },
 
   decoration = {
+    -- Small on purpose: the film's terminals have square corners, and this is
+    -- only enough to keep a window from looking like a raw rectangle. No
+    -- rounding_power set with it -- the superellipse exponent is what stops a
+    -- large radius pinching where the straight edge meets the curve, and at 3
+    -- there is nothing to pinch.
+    rounding = 3,
+
     blur = {
       enabled = false,
     },

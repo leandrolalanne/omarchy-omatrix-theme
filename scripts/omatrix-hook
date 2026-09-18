@@ -81,9 +81,12 @@ restore_ghostty_extra() {
 case "${theme_name,,}" in
   omatrix)
     restore_ghostty_extra
-    # This theme declares its own decoration in hyprland.lua, but that file was
-    # loaded before the other hooks ran, so re-assert it rather than trust it.
-    hyprctl eval 'hl.config({ decoration = { rounding = 10, blur = { enabled = false } } })' >/dev/null 2>&1
+    # The decoration this theme wants is declared in hyprland.lua, and the other
+    # hooks overwrote it at runtime after that file was loaded. Reload rather
+    # than re-assert: a reload reapplies whatever the active theme declares, so
+    # the values live in exactly one place instead of being mirrored in bash
+    # where they would quietly drift out of step.
+    hyprctl reload >/dev/null 2>&1
 
     # Already on the font: do not rewrite configs or restart the shell for
     # nothing. The restore above still has to happen every time.
