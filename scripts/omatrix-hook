@@ -75,6 +75,25 @@ write_font() {
 
 # Put back what another theme's hook truncated. The staged copy is what
 # ~/.config/ghostty/config includes, and the theme folder is where ours lives.
+# The second screensaver: the lines from Neo's monitor, with the login name in
+# place of his. Written at theme-set rather than read at render time, because
+# the shim that shows it runs inside the screensaver, where a failure is a black
+# screen with nothing to read.
+write_wakeup() {
+    local dir="$HOME/.local/state/omatrix"
+    local who="${USER:-$(id -un)}"
+    mkdir -p "$dir" || return 0
+    # Capitalised: it stands where a name stands in the film.
+    who="${who^}"
+    cat > "$dir/wakeup.txt" <<TXT
+Wake up, $who...
+The Omatrix has you...
+Follow the White Rabbit...
+Knock, knock, $who.
+TXT
+    return 0
+}
+
 # Omarchy's screensaver reads one file, so the wordmark is the screensaver.
 # The .pre-omatrix copy is written once and never overwritten: switching themes
 # twice must not end up saving our own logo as "the original".
@@ -110,6 +129,7 @@ case "${theme_name,,}" in
   omatrix)
     restore_ghostty_extra
     swap_branding on
+    write_wakeup
     # The decoration this theme wants is declared in hyprland.lua, and the other
     # hooks overwrote it at runtime after that file was loaded. Reload rather
     # than re-assert: a reload reapplies whatever the active theme declares, so

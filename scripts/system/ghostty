@@ -13,8 +13,17 @@
 # only when the invocation is unmistakably the screensaver's AND omatrix is the
 # current theme. Any other terminal you open passes through untouched.
 #
-# 9 pt because that is the size the rest of the project renders at: it is the
-# film's own, and what matrix-rain and redpill both default to.
+# There are two screensavers and they want different sizes, so the choice is
+# made HERE and not in the ttfx shim: the point size is fixed when the terminal
+# opens, long before ttfx runs. The choice travels down to that shim in the
+# environment, which it inherits through omarchy-screensaver.
+#
+#   rain  the OMATRIX wordmark condensing out of the digital rain, at 9 pt --
+#         the film's own size, and what matrix-rain and redpill default to
+#   wake  the lines from Neo's monitor typed out, at 16 pt
+#
+# They alternate rather than being drawn at random, so both are actually seen.
+# If the state file cannot be read or written, it falls back to the rain.
 
 want=
 for a in "$@"; do
@@ -30,10 +39,16 @@ if [[ ${theme,,} != omatrix ]]; then
   exec /usr/bin/ghostty "$@"
 fi
 
+state="${XDG_RUNTIME_DIR:-/tmp}/omatrix-screensaver"
+[[ $(cat "$state" 2>/dev/null) == wake ]] && pick=rain || pick=wake
+printf '%s' "$pick" >"$state" 2>/dev/null
+
+[[ $pick == wake ]] && size=16 || size=9
+
 args=()
 for a in "$@"; do
-  [[ $a == --font-size=* ]] && a="--font-size=9"
+  [[ $a == --font-size=* ]] && a="--font-size=$size"
   args+=("$a")
 done
 
-exec /usr/bin/ghostty "${args[@]}"
+exec env OMATRIX_SCREENSAVER="$pick" /usr/bin/ghostty "${args[@]}"

@@ -33,6 +33,11 @@ if [[ -d $BGDIR ]]; then
   rm -rf "$BGDIR"; echo "removed $BGDIR"; removed=1
 fi
 
+STATE="$HOME/.local/state/omatrix"
+if [[ -d $STATE ]]; then
+  rm -rf "$STATE"; echo "removed $STATE"; removed=1
+fi
+
 # The screensaver shim is the one thing that lives outside $HOME, so it is not
 # removed here: this script does not ask for root, and should not.
 if [[ -e /usr/local/bin/omarchy-screensaver ]]; then

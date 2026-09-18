@@ -30,6 +30,28 @@ fi
 # The greens are the ones the rest of the theme uses, measured off the rain:
 #   176105 the dark end of the ramp, 89f76e its bright end, b0fa9e the pale top,
 #   d9ffff the leading glyph of a falling drop.
+# Which of the two screensavers the ghostty shim chose. It had to decide first:
+# the point size is fixed when the terminal opens, long before this runs.
+WAKEUP="$HOME/.local/state/omatrix/wakeup.txt"
+
+if [[ ${OMATRIX_SCREENSAVER:-} == wake && -s $WAKEUP ]]; then
+  # The input file is swapped as well as the effect. -i carries its path in the
+  # NEXT argument, so the two are replaced together.
+  args=(); skip=
+  for a in "$@"; do
+    if [[ -n $skip ]]; then skip=; args+=("$WAKEUP"); continue; fi
+    [[ $a == --random-effect ]] && continue
+    [[ $a == -i ]] && skip=1
+    args+=("$a")
+  done
+  # `print` walks a visible print head down the lines, carriage return and all,
+  # which is the typewriter on Neo's monitor. One colour rather than a gradient:
+  # the film's is flat green.
+  exec /usr/bin/ttfx "${args[@]}" print \
+    --print-speed 1 \
+    --final-gradient-stops 89f76e
+fi
+
 args=()
 for a in "$@"; do
   [[ $a == --random-effect ]] || args+=("$a")
