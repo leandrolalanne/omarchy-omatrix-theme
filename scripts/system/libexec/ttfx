@@ -1,0 +1,23 @@
+#!/bin/bash
+# Reached only through the omatrix screensaver shim, which puts this directory
+# in PATH for that one process. Drops --random-effect and asks for the matrix
+# effect instead, in the film's own greens -- the same measured stops the rest
+# of the theme uses:
+#
+#   176105  the dark end of the rain's ramp
+#   89f76e  its bright end
+#   b0fa9e  the pale top
+#   d9ffff  the leading glyph of a falling drop
+#
+# ttfx takes the effect as a subcommand after the global options, so it is
+# appended rather than substituted in place.
+
+args=()
+for a in "$@"; do
+  [[ $a == --random-effect ]] || args+=("$a")
+done
+
+exec /usr/bin/ttfx "${args[@]}" matrix \
+  --rain-color-gradient 185318 89f76e \
+  --highlight-color d9ffff \
+  --final-gradient-stops 176105 89f76e b0fa9e

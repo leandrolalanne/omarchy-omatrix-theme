@@ -82,6 +82,15 @@ else
   echo "NOTE: could not enable $PLUGIN_ID; run: omarchy plugin enable $PLUGIN_ID"
 fi
 
+# Deliberately not done here: it needs root and writes outside $HOME.
+if [[ ! -e /usr/local/bin/omarchy-screensaver ]]; then
+  echo
+  echo "Optional: Omarchy's screensaver picks a random effect, so it lands on"
+  echo "fireworks as often as on the rain. To pin it to the matrix effect while"
+  echo "this theme is active:"
+  echo "      sudo $SRC/scripts/install-screensaver-effect.sh"
+fi
+
 echo
 echo "Done. Apply it with:  omarchy theme set $SLUG"
 echo "Then cycle wallpapers to reach the live ones (Super+Ctrl+Space, or"

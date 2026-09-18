@@ -33,6 +33,14 @@ if [[ -d $BGDIR ]]; then
   rm -rf "$BGDIR"; echo "removed $BGDIR"; removed=1
 fi
 
+# The screensaver shim is the one thing that lives outside $HOME, so it is not
+# removed here: this script does not ask for root, and should not.
+if [[ -e /usr/local/bin/omarchy-screensaver ]]; then
+  echo
+  echo "NOTE: the forced matrix screensaver effect is still installed. Remove it with:"
+  echo "      sudo $(dirname "${BASH_SOURCE[0]}")/scripts/install-screensaver-effect.sh --remove"
+fi
+
 (( removed )) || echo "nothing to remove"
 echo
 echo "NOTE: if omatrix is the current theme, pick another one:  omarchy theme set <name>"
