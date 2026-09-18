@@ -1,0 +1,71 @@
+#!/bin/bash
+# Set the film's terminal typeface while omatrix is active, and put the previous
+# one back on the way out.
+#
+# `omarchy font set` is global and permanent -- it has no notion of a theme --
+# so this hook is what makes it behave as though the font belonged to omatrix.
+#
+# Why Courier Prime, and why Bold: the lines on Neo's monitor (`Wake up,
+# Neo...`) are set in a typewriter serif monospace, not the pixel or techno face
+# the internet usually reaches for. tymurbogach's enter-the-matrix theme
+# established this the honest way, by measuring against frames of the film: its
+# cells agree with the typed lines to 0.3 px, and Regular reads thin and narrow
+# next to the stills where the reference is blocky and compact. Courier Prime is
+# a 2015 face, so it cannot literally be the film's -- the production would have
+# had Courier or Courier New -- but it is the free, OFL-licensed equivalent that
+# matches measurably.
+#
+# Omarchy passes the slug of the newly selected theme as $1.
+
+set -euo pipefail
+
+theme_font="Courier Prime"
+theme_size=11
+
+# Where leaving omatrix returns to. Always Omarchy's default, never "whatever
+# was set on the way in": entering once with an odd size is enough to make that
+# size stick across every other theme afterwards.
+fallback_font="JetBrainsMono Nerd Font"
+fallback_size=9
+
+theme_name="${1:-}"
+[[ -n $theme_name ]] || theme_name=$(cat "$HOME/.local/state/omarchy/current/theme.name" 2>/dev/null || true)
+
+# fontconfig is the source of truth, the same one `omarchy font current` reads.
+current_font=$(omarchy font current 2>/dev/null || true)
+
+# `omarchy font set` changes the family in all four terminals and in
+# fontconfig, but not the size, and it pins foot to :size=9. So the size is
+# applied afterwards and foot's line is rewritten whole.
+write_font() {
+  local font=$1 size=$2
+  omarchy font set "$font" >/dev/null 2>&1 || return 0
+
+  local alacritty="$HOME/.config/alacritty/alacritty.toml"
+  local ghostty="$HOME/.config/ghostty/config"
+  local kitty="$HOME/.config/kitty/kitty.conf"
+  local foot="$HOME/.config/foot/foot.ini"
+
+  [[ -f $alacritty ]] && sed -i "s|^size = .*|size = $size|" "$alacritty"
+  [[ -f $ghostty ]] && sed -i "s|^font-size = .*|font-size = $size|" "$ghostty"
+  [[ -f $kitty ]] && sed -i "s|^font_size .*|font_size ${size}.0|" "$kitty"
+  [[ -f $foot ]] && sed -i "s|^font=.*|font=$font:size=$size|" "$foot"
+
+  # Those seds run after `omarchy font set` already signalled the terminals, so
+  # they have to be told again about the size.
+  omarchy restart terminal >/dev/null 2>&1 || true
+}
+
+case "${theme_name,,}" in
+  omatrix)
+    # Already there: do not rewrite configs or restart the shell for nothing.
+    [[ $current_font == "$theme_font" ]] && exit 0
+    write_font "$theme_font" "$theme_size"
+    ;;
+  *)
+    # Only step in when leaving OUR font behind. If the user picked something
+    # else by hand, a theme change has no business overriding it.
+    [[ $current_font == "$theme_font" ]] || exit 0
+    write_font "$fallback_font" "$fallback_size"
+    ;;
+esac

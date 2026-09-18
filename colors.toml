@@ -1,38 +1,58 @@
-# PLACEHOLDER - the palette is not decided yet.
-# Omarchy regenerates these from here: alacritty, foot, ghostty, kitty, btop,
-# neovim, hyprland, shell.toml, chromium, vscode, helix, keyboard.rgb.
-# Templates: /usr/share/omarchy/default/themed/*.tpl
+# omatrix -- the Matrix, as a desktop.
+#
+# The greens are not chosen, they are measured. Every one is taken from the
+# rain's own colour ramp in matrix-rain, which reproduces Rezmason's
+# reconstruction to within 0.5% on colour balance:
+#
+#     dark   #176105     bright #89f76e     pale #b0fa9e
+#     hot    #d9ffff     the leading glyph of a falling drop
+#
+# The film's green sits at hue 108. The "Matrix green" people usually reach for,
+# #00ff41, is at 135 -- a different colour, 27 degrees away.
+#
+# The backgrounds are deliberately neutral and nearly black. They are a backdrop
+# for terminals full of rain, not a statement of their own; the default
+# wallpaper is chosen on the same principle.
+#
+# The ANSI slots are monochrome on purpose: everything lives inside the green
+# family, the way an operator's screen does. That costs legibility where colour
+# carries meaning -- in a diff, red and green land on the same hue -- and it is
+# the trade this theme accepts. Swapping to a semantic set is an edit of this
+# file and `omarchy theme refresh`.
 
 mode = "dark"
 
-accent = "#00ff41"
-selection = "#003b00"
-muted = "#1b3a1b"
+accent = "#89f76e"
+selection = "#143a0c"
+selection_background = "#143a0c"
+selection_foreground = "#d9ffff"
+muted = "#34861f"
 
-background = "#000000"
-dark_background = "#000000"
-darker_background = "#000000"
-lighter_background = "#0a140a"
+background = "#070a0b"
+dark_background = "#040607"
+darker_background = "#020304"
+lighter_background = "#0e1315"
 
-foreground = "#00ff41"
-dark_foreground = "#008f11"
-light_foreground = "#3ff56f"
-bright_foreground = "#c8ffd4"
+foreground = "#b0fa9e"
+dark_foreground = "#4aa434"
+light_foreground = "#9cf886"
+bright_foreground = "#d9ffff"
 
-hyprland_active_border = "rgba(00ff41ee) rgba(008f11ee) 45deg"
+hyprland_active_border = "rgba(89f76eee) rgba(4aa434ee) 45deg"
+hyprland_inactive_border = "rgba(34861f66)"
 
-red = "#00c832"
-yellow = "#5aff6e"
-orange = "#2fe04a"
-green = "#00ff41"
-cyan = "#4dffa3"
-blue = "#00b34d"
-magenta = "#3ddb7a"
-brown = "#0b5c1c"
+red = "#398e24"
+yellow = "#9ef988"
+orange = "#6cd254"
+green = "#89f76e"
+cyan = "#adfbaf"
+blue = "#56b43f"
+magenta = "#99f98b"
+brown = "#257312"
 
-bright_red = "#4dff77"
-bright_yellow = "#9dffaa"
-bright_green = "#7bff95"
-bright_cyan = "#a8ffd0"
-bright_blue = "#5affa0"
-bright_magenta = "#8bffb4"
+bright_red = "#93f87a"
+bright_yellow = "#befcc0"
+bright_green = "#a0f98b"
+bright_cyan = "#c9fdd8"
+bright_blue = "#b5fbbe"
+bright_magenta = "#b8fbb1"
