@@ -37,6 +37,12 @@ origin=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{print $7; exit}')
 
 LEAD="Trace complete. Call origin: #"
 
+# Seconds between frames of the lock-in. The whole banner costs two frames per
+# character of the address plus one, and the shell shows no prompt until it
+# returns, so this is the only knob that matters: 0.012 is about 370 ms end to
+# end on a 13-character address, 0.025 about 700 ms, 0.035 about 970 ms.
+STEP=${OMATRIX_TRACE_STEP:-0.025}
+
 printf '\n'
 printf '%sCall trans opt: received. %s REC:Log>%s\n' "$GREEN" "$when" "$RESET"
 printf '%sTrace program: running%s\n' "$GREEN" "$RESET"
@@ -60,7 +66,7 @@ if (( cols > ${#LEAD} + ${#origin} + 1 )); then
         if [[ ${origin:j:1} == . ]]; then noise+=.; else noise+=$(( RANDOM % 10 )); fi
       done
       printf '\r%s%s%s' "$LEAD" "${origin:0:k}" "$noise"
-      sleep 0.012
+      sleep "$STEP"
     done
   done
   printf '\r%s%s%s%s\n\n' "$LEAD" "$origin" "$RESET" "$SHOW"
