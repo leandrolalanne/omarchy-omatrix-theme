@@ -33,6 +33,12 @@ if [[ -d $BGDIR ]]; then
   rm -rf "$BGDIR"; echo "removed $BGDIR"; removed=1
 fi
 
+WELCOME="$HOME/.local/bin/omarchy-terminal-welcome"
+if [[ -w $WELCOME ]] && grep -q '  omatrix)' "$WELCOME"; then
+  sed -i '/# omatrix ships its own banner/d; /^  omatrix) exec /d' "$WELCOME"
+  echo "unpatched $WELCOME"; removed=1
+fi
+
 STATE="$HOME/.local/state/omatrix"
 if [[ -d $STATE ]]; then
   rm -rf "$STATE"; echo "removed $STATE"; removed=1

@@ -1,0 +1,37 @@
+#!/bin/bash
+# The banner on a new terminal: the first thing the film shows.
+#
+# The Matrix opens on a screen, not on a face. The script's own stage direction
+# has it read
+#
+#     Call trans opt: received. 2-19-96 13:24:18 REC:Log>
+#     Trace program: running
+#     Trace complete. Call origin: #312-555-0690
+#
+# which is already a terminal readout, so nothing has to be invented to fit --
+# only the date and the origin are swapped for real ones. The trace that hunts
+# Neo in the film lands on this machine instead.
+#
+# No leading bar or gutter: the original has none.
+#
+# This runs on EVERY new terminal, so it stays to builtins, one `date` and one
+# `ip` call. No DNS, nothing that can block a prompt.
+
+set -u
+
+GREEN=$'\033[38;2;137;247;110m'   # the theme accent
+RESET=$'\033[0m'
+
+# The film's format: M-D-YY H:MM:SS, no zero padding on the date.
+when=$(date '+%-m-%-d-%y %H:%M:%S')
+
+# Where the call comes from. The route lookup is local and instant -- it asks
+# the kernel which source address it would use, and contacts nobody.
+origin=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{print $7; exit}')
+[[ -n $origin ]] || origin=$(hostname -I 2>/dev/null | awk '{print $1}')
+[[ -n $origin ]] || origin=127.0.0.1
+
+printf '\n'
+printf '%sCall trans opt: received. %s REC:Log>%s\n' "$GREEN" "$when" "$RESET"
+printf '%sTrace program: running%s\n' "$GREEN" "$RESET"
+printf '%sTrace complete. Call origin: #%s%s\n\n' "$GREEN" "$origin" "$RESET"

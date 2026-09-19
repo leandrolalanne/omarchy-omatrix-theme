@@ -40,6 +40,21 @@ install -m 755 "$SRC/hooks/post-boot.d-omatrix" "$BOOT_HOOKS/$SLUG"
 echo "linked   $HOOKS/$SLUG"
 echo "linked   $BOOT_HOOKS/$SLUG"
 
+# --- the terminal banner ---
+# omarchy-terminal-welcome is the user's own script and already branches per
+# theme (solaros, 640k). This adds one line that hands off to ours, placed
+# before its data gathering so nothing else runs for this theme. Idempotent, and
+# uninstall.sh takes the line back out.
+WELCOME="$HOME/.local/bin/omarchy-terminal-welcome"
+if [[ -w $WELCOME ]] && ! grep -q '  omatrix)' "$WELCOME"; then
+  if grep -q '^  \*) exit 0 ;;$' "$WELCOME"; then
+    sed -i 's|^  \*) exit 0 ;;$|  # omatrix ships its own banner; hand off before the data-gathering below.\n  omatrix) exec "$HOME/.config/omarchy/themes/omatrix/scripts/omatrix-welcome" ;;\n  *) exit 0 ;;|' "$WELCOME"
+    echo "patched  $WELCOME"
+  else
+    echo "NOTE: could not add the banner to $WELCOME; its shape has changed."
+  fi
+fi
+
 # --- the background machinery ---
 mkdir -p "$PLUGINS"
 ln -sfn "$SRC/plugin" "$PLUGINS/$PLUGIN_ID"
