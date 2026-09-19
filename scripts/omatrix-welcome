@@ -10,28 +10,60 @@
 #
 # which is already a terminal readout, so nothing has to be invented to fit --
 # only the date and the origin are swapped for real ones. The trace that hunts
-# Neo in the film lands on this machine instead.
+# Neo in the film lands on this machine instead, and the last line ends on `>`
+# so the real prompt below reads as its continuation.
 #
-# No leading bar or gutter: the original has none.
+# No leading bar or gutter: the original has none, and Courier Prime -- the face
+# this theme sets -- carries no box-drawing or block characters at all, so one
+# would have come from a fallback font at a different weight.
 #
-# This runs on EVERY new terminal, so it stays to builtins, one `date` and one
-# `ip` call. No DNS, nothing that can block a prompt.
+# This runs on EVERY new terminal and the shell shows no prompt until it
+# returns, so the whole thing is builtins plus one `date`, one `ip route get`
+# (which asks the kernel for a source address and contacts nobody), and the
+# sleeps below. Measured at about 340 ms, against 4 ms with the animation off.
 
 set -u
 
 GREEN=$'\033[38;2;137;247;110m'   # the theme accent
 RESET=$'\033[0m'
+HIDE=$'\033[?25l'
+SHOW=$'\033[?25h'
 
-# The film's format: M-D-YY H:MM:SS, no zero padding on the date.
 when=$(date '+%-m-%-d-%y %H:%M:%S')
 
-# Where the call comes from. The route lookup is local and instant -- it asks
-# the kernel which source address it would use, and contacts nobody.
 origin=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{print $7; exit}')
 [[ -n $origin ]] || origin=$(hostname -I 2>/dev/null | awk '{print $1}')
 [[ -n $origin ]] || origin=127.0.0.1
 
+LEAD="Trace complete. Call origin: #"
+
 printf '\n'
 printf '%sCall trans opt: received. %s REC:Log>%s\n' "$GREEN" "$when" "$RESET"
 printf '%sTrace program: running%s\n' "$GREEN" "$RESET"
-printf '%sTrace complete. Call origin: #%s%s\n\n' "$GREEN" "$origin" "$RESET"
+
+# The scene has the digits of the number lock into place one at a time while the
+# trace runs, so the address does the same, left to right.
+#
+# It redraws the line with a carriage return, which needs the line to fit on one
+# row -- a wrapped line cannot be rewound this way. Below that width it just
+# prints, rather than smearing across two rows.
+cols=${COLUMNS:-0}
+(( cols > 0 )) || cols=$(tput cols 2>/dev/null || printf '80')
+
+if (( cols > ${#LEAD} + ${#origin} + 1 )); then
+  printf '%s%s' "$HIDE" "$GREEN"
+  trap 'printf "%s" "$SHOW"' EXIT
+  for (( k = 0; k <= ${#origin}; k++ )); do
+    for (( s = 0; s < 2; s++ )); do
+      noise=
+      for (( j = k; j < ${#origin}; j++ )); do
+        if [[ ${origin:j:1} == . ]]; then noise+=.; else noise+=$(( RANDOM % 10 )); fi
+      done
+      printf '\r%s%s%s' "$LEAD" "${origin:0:k}" "$noise"
+      sleep 0.012
+    done
+  done
+  printf '\r%s%s%s%s\n\n' "$LEAD" "$origin" "$RESET" "$SHOW"
+else
+  printf '%s%s%s%s\n\n' "$GREEN" "$LEAD" "$origin" "$RESET"
+fi
