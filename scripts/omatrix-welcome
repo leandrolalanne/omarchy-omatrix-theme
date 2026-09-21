@@ -1,5 +1,5 @@
 #!/bin/bash
-# The banner on a new terminal: the first thing the film shows.
+# The banner on a new terminal: the first thing the film shows, as it happens.
 #
 # The Matrix opens on a screen, not on a face. The script's own stage direction
 # has it read
@@ -13,14 +13,26 @@
 # Neo in the film lands on this machine instead, and the last line ends on `>`
 # so the real prompt below reads as its continuation.
 #
+# It is typed out rather than printed, so it reads as a program running now.
+# Evenly, with no jitter: this is a machine writing to a screen, not a person at
+# a keyboard. The screensaver's lines are the other case and do have jitter.
+#
+# Then the digits of the address lock into place one at a time, which is what
+# the scene does with the phone number while the trace closes in.
+#
 # No leading bar or gutter: the original has none, and Courier Prime -- the face
 # this theme sets -- carries no box-drawing or block characters at all, so one
 # would have come from a fallback font at a different weight.
 #
-# This runs on EVERY new terminal and the shell shows no prompt until it
-# returns, so the whole thing is builtins plus one `date`, one `ip route get`
-# (which asks the kernel for a source address and contacts nobody), and the
-# sleeps below. Measured at about 340 ms, against 4 ms with the animation off.
+# COST. This runs on every new terminal and the shell shows no prompt until it
+# returns. Both speeds are knobs, and either at 0 turns that part off:
+#
+#     OMATRIX_TYPE_STEP     seconds per character   default 0.012
+#     OMATRIX_TRACE_STEP    seconds per lock frame  default 0.025
+#
+# Delays are a timed read on a fifo rather than `sleep`, which would fork ~130
+# times in a shell's startup path. Measured over 100 delays: 1279 ms of forks
+# against 1213 ms of builtin, on 1200 ms of intended wait.
 
 set -u
 
@@ -29,47 +41,68 @@ RESET=$'\033[0m'
 HIDE=$'\033[?25l'
 SHOW=$'\033[?25h'
 
+TYPE=${OMATRIX_TYPE_STEP:-0.012}
+STEP=${OMATRIX_TRACE_STEP:-0.025}
+
 when=$(date '+%-m-%-d-%y %H:%M:%S')
 
+# The route lookup asks the kernel which source address it would use and
+# contacts nobody, so it cannot hang a prompt.
 origin=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{print $7; exit}')
 [[ -n $origin ]] || origin=$(hostname -I 2>/dev/null | awk '{print $1}')
 [[ -n $origin ]] || origin=127.0.0.1
 
+L1="Call trans opt: received. $when REC:Log>"
+L2="Trace program: running"
 LEAD="Trace complete. Call origin: #"
 
-# Seconds between frames of the lock-in. The whole banner costs two frames per
-# character of the address plus one, and the shell shows no prompt until it
-# returns, so this is the only knob that matters: 0.012 is about 370 ms end to
-# end on a 13-character address, 0.025 about 700 ms, 0.035 about 970 ms.
-STEP=${OMATRIX_TRACE_STEP:-0.025}
-
-printf '\n'
-printf '%sCall trans opt: received. %s REC:Log>%s\n' "$GREEN" "$when" "$RESET"
-printf '%sTrace program: running%s\n' "$GREEN" "$RESET"
-
-# The scene has the digits of the number lock into place one at a time while the
-# trace runs, so the address does the same, left to right.
-#
-# It redraws the line with a carriage return, which needs the line to fit on one
-# row -- a wrapped line cannot be rewound this way. Below that width it just
-# prints, rather than smearing across two rows.
+# Redrawing the third line needs it to fit on one row: a wrapped line cannot be
+# rewound with a carriage return. Below that width, print the lot and leave.
 cols=${COLUMNS:-0}
 (( cols > 0 )) || cols=$(tput cols 2>/dev/null || printf '80')
+longest=${#L1}
+(( ${#LEAD} + ${#origin} > longest )) && longest=$(( ${#LEAD} + ${#origin} ))
 
-if (( cols > ${#LEAD} + ${#origin} + 1 )); then
-  printf '%s%s' "$HIDE" "$GREEN"
-  trap 'printf "%s" "$SHOW"' EXIT
-  for (( k = 0; k <= ${#origin}; k++ )); do
-    for (( s = 0; s < 2; s++ )); do
-      noise=
-      for (( j = k; j < ${#origin}; j++ )); do
-        if [[ ${origin:j:1} == . ]]; then noise+=.; else noise+=$(( RANDOM % 10 )); fi
-      done
-      printf '\r%s%s%s' "$LEAD" "${origin:0:k}" "$noise"
-      sleep "$STEP"
-    done
-  done
-  printf '\r%s%s%s%s\n\n' "$LEAD" "$origin" "$RESET" "$SHOW"
-else
-  printf '%s%s%s%s\n\n' "$GREEN" "$LEAD" "$origin" "$RESET"
+if (( cols <= longest + 1 )); then
+  printf '\n%s%s\n%s\n%s%s%s\n\n' "$GREEN" "$L1" "$L2" "$LEAD" "$origin" "$RESET"
+  exit 0
 fi
+
+# A fifo held open for reading and writing never reaches EOF, so a timed read on
+# it is a pause: the wait happens in bash itself, with no process spawned.
+pause() { :; }
+fifo=$(mktemp -u) || fifo=
+if [[ -n $fifo ]] && mkfifo "$fifo" 2>/dev/null; then
+  exec 9<>"$fifo"; rm -f "$fifo"
+  pause() { read -t "$1" -u 9 _ 2>/dev/null || true; }
+else
+  pause() { sleep "$1"; }
+fi
+
+type_out() {
+  local s=$1 i
+  for (( i = 0; i < ${#s}; i++ )); do
+    printf '%s' "${s:i:1}"
+    pause "$TYPE"
+  done
+}
+
+printf '\n%s%s' "$HIDE" "$GREEN"
+trap 'printf "%s%s" "$RESET" "$SHOW"' EXIT
+
+type_out "$L1"; printf '\n'
+type_out "$L2"; printf '\n'
+type_out "$LEAD"
+
+for (( k = 0; k <= ${#origin}; k++ )); do
+  for (( s = 0; s < 2; s++ )); do
+    noise=
+    for (( j = k; j < ${#origin}; j++ )); do
+      if [[ ${origin:j:1} == . ]]; then noise+=.; else noise+=$(( RANDOM % 10 )); fi
+    done
+    printf '\r%s%s%s' "$LEAD" "${origin:0:k}" "$noise"
+    pause "$STEP"
+  done
+done
+
+printf '\r%s%s\n\n' "$LEAD" "$origin"
