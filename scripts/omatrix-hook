@@ -63,21 +63,40 @@ write_font() {
   omarchy restart terminal >/dev/null 2>&1 || true
 }
 
-# Put back what another theme's hook truncated. The staged copy is what
-# ~/.config/ghostty/config includes, and the theme folder is where ours lives.
 # The screensaver's terminal inherits the user's whole ghostty config chain,
 # translucency included -- verified by reading the config files it loads. A
 # screensaver has to cover what is behind it, so this hands it a file that turns
-# that back off. It has to be a config file: ghostty ignores
-# --background-opacity on the command line (measured: 0.2 and 1.0 render
-# identically), while a --config-file is honoured.
+# that back off, and that names the glyph font outright. It has to be a config
+# file: ghostty ignores --background-opacity on the command line (measured: 0.2
+# and 1.0 render identically), while a --config-file is honoured.
 write_screensaver_conf() {
     local dir="$HOME/.local/state/omatrix"
     mkdir -p "$dir" || return 0
+
+    # Shared by both screensavers.
     cat > "$dir/screensaver.conf" <<CONF
 # Loaded only by the screensaver, through the ghostty shim. The theme's own
 # omatrix.conf makes terminals translucent; a screensaver must not be.
 background-opacity = 1
+CONF
+
+    # The rain only. It falls in the film's glyphs, which live in plane 16 and
+    # are reached through this family alone. Declaring it HERE rather than
+    # relying on a line in the user's ~/.config/ghostty/config is what makes the
+    # screensaver independent: that line is a manual step matrix-rain suggests
+    # for \`redpill\` and does not perform, so a machine can perfectly well have
+    # the font and not the include.
+    #
+    # It must NOT reach the other screensaver: that one is the lines from Neo's
+    # monitor, plain text, and this family maps no ASCII at all -- every letter
+    # would come from whatever ghostty fell back to instead of the theme font.
+    #
+    # Written whether or not the font is installed, so adding matrix-rain later
+    # needs no re-stage: scripts/system/ttfx checks at render time and asks for
+    # plain katakana when nothing covers plane 16.
+    cat > "$dir/screensaver-rain.conf" <<CONF
+background-opacity = 1
+font-family = "Matrix Code Terminal"
 CONF
     return 0
 }
@@ -137,7 +156,7 @@ case "${theme_name,,}" in
     hyprctl reload >/dev/null 2>&1
 
     # Already on the font: do not rewrite configs or restart the shell for
-    # nothing. The restore above still has to happen every time.
+    # nothing. Everything above still has to run on every theme-set.
     [[ $current_font == "$theme_font" ]] && exit 0
     write_font "$theme_font" "$theme_size"
     ;;

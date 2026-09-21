@@ -95,8 +95,23 @@ done
 # Regenerate with: tools/make-rain-symbols.py
 RAIN_SYMBOLS="􀀢 􀀪 􀀫 􀀰 􀀱 􀀲 􀀳 􀀴 􀀵 􀀷 􀀸 􀀹 􀀺 􀀼 􀀾 􀁺 􀁼 􀂦 􀂩 􂕌 􂖪 􃂢 􃂦 􃂨 􃂪 􃂫 􃂭 􃂱 􃂳 􃂵 􃂷 􃂹 􃂻 􃂽 􃂿 􃃄 􃃆 􃃊 􃃋 􃃌 􃃍 􃃏 􃃒 􃃛 􃃞 􃃟 􃃠 􃃡 􃃢 􃃤 􃃨 􃃩 􃃪 􃃯 􃃼 􊞊"
 
+# Those glyphs exist only if MatrixCodeTerminal.ttf is installed, and it comes
+# with matrix-rain -- a separate project that may simply not be on this machine.
+# Plane 16 is empty by construction, which is the whole point of the trick, so
+# when no font covers it these codepoints have no glyph anywhere and the rain
+# would render as a screen of empty boxes with nothing to explain it.
+#
+# fontconfig is asked the exact question that matters -- is any font covering
+# plane 16 -- rather than looking for a file by name. Without one, the flag is
+# dropped and ttfx falls back to its own halfwidth katakana: generic rain
+# instead of tofu.
+symbols=()
+if fc-list ':charset=100000' 2>/dev/null | grep -q .; then
+  symbols=(--rain-symbols $RAIN_SYMBOLS)
+fi
+
 exec /usr/bin/ttfx "${args[@]}" matrix \
-  --rain-symbols $RAIN_SYMBOLS \
+  ${symbols[@]+"${symbols[@]}"} \
   --rain-color-gradient 185318 89f76e \
   --highlight-color d9ffff \
   --final-gradient-stops 176105 89f76e b0fa9e
