@@ -294,14 +294,20 @@ def main():
 
     shutil.rmtree(DEST, ignore_errors=True)
     staging.rename(DEST)
-    # Replacing the directory with a rename does not look like "a file was
-    # saved" to the plugin watcher, so the shell keeps running the old copy.
-    # Measured: the patch was in the file and the screen still showed the
-    # previous one until this was asked for explicitly.
-    shell = shutil.which("omarchy-shell")
-    if shell:
-        subprocess.run([shell, "-q", "shell", "rescanPlugins"],
-                       capture_output=True, timeout=10)
+    # The lock is a `keepLoaded` service, and neither the plugin watcher nor
+    # rescanPlugins tears one of those down: replacing the directory left the
+    # shell running the previous copy with the new one sitting unread on disk.
+    # Measured twice -- the file held the new colours and the screen sampled at
+    # the old hue until the shell was restarted. So restart it, because a derive
+    # that does not reach the screen is a derive that lied.
+    #
+    # --no-restart is for the post-update hook, where Omarchy restarts the shell
+    # itself and doing it twice only makes the bar blink for nothing.
+    if "--no-restart" not in sys.argv:
+        restart = shutil.which("omarchy")
+        if restart:
+            subprocess.run([restart, "restart", "shell"],
+                           capture_output=True, timeout=30)
 
     print(f"derived  {DEST}")
     print(f"         from {SOURCE}/LockView.qml")

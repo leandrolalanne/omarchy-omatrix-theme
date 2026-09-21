@@ -1,32 +1,41 @@
-# The lock's password field, measured off the box the film puts over the digit
-# field -- the one that reads SYSTEM FAILURE at the end. The geometry is applied
-# by scripts/derive-lock.py; the colour is applied here, because Omarchy already
-# has a supported place for it and a patched file is one more thing to re-derive.
+# The lock's password field, taking the style of the box the film draws over the
+# digit field. The geometry is applied by scripts/derive-lock.py; the colour is
+# applied here, because Omarchy already has a supported place for it and a
+# patched file is one more thing to re-derive.
 #
-#   border  rgb(69,89,96)    hue 196, saturation 16%
-#   fill    rgb(6,49,37)     hue 163
-#   text    rgb(16,154,117)  hue 164
+# A thin light line, green letters, and a black interior. That last part was
+# measured wrong the first time: averaging the whole inside of the box gives a
+# dark green, which is the BLOOM off the letters rather than the fill. Sampling
+# only the rows above and below the text gives rgb(5,16,15) -- luminance 4%.
 #
-# The border is the one deliberate departure in the whole frame. Everything else
-# in it -- the fill, the text, and the digits behind at hue 159-161 -- sits in
-# the same narrow band. The border sits thirty degrees away with almost no
-# saturation left, so it reads as chassis rather than as more code, and the box
-# does not dissolve into the field it covers.
+#   border  rgb(56,108,100) at its brightest, 32% saturation -- reads as white
+#   fill    rgb(5,16,15)    luminance 4%, black
+#   text    rgb(18,136,105)
 #
-# Opaque on purpose. Omarchy's default is 0.8 and the digits show straight
-# through the box; in the frame nothing behind it is visible at all.
+# The greens are this theme's rather than the frame's, for the same reason the
+# digits are: the frame sits at hue 159-171 and this desktop is 108 everywhere.
+# What carries over is the structure -- light line, black interior, green
+# letters -- which is the part that makes the box read as that box.
+#
+# The border is deliberately the one thing here that is not green. In the frame
+# it is desaturated against a field of code; here it is the theme's brightest
+# tone against a field of green, doing the same job. It reads as chassis rather
+# than as more code, so the box does not dissolve into what it covers.
+#
+# Opaque, and the alpha matters. Omarchy's default is 0.8 and the digits showed
+# straight through the box; in the frame nothing behind it is visible at all.
 
-background       = "#063125"
+background       = "#070a0b"
 background-alpha = 1.0
 
-text             = "#109a75"
-placeholder      = "#0d7a5d"
-text-error       = "#b0fa9e"
+text             = "#b0fa9e"
+placeholder      = "#61c249"
+text-error       = "#d9ffff"
 
-border           = "#455960"
-border-active    = "#455960"
+border           = "#d9ffff"
+border-active    = "#d9ffff"
 border-error     = "#89f76e"
 border-alpha     = 1.0
 
-selection        = "#109a75"
+selection        = "#3d9926"
 selection-alpha  = 0.45
