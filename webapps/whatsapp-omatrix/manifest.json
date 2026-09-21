@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "WhatsApp — omatrix",
+  "version": "0.1.0",
+  "description": "Matrix styling for WhatsApp Web, active only while the omatrix Omarchy theme is.",
+  "content_scripts": [
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["theme-loader.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    { "resources": ["active.css"], "matches": ["https://web.whatsapp.com/*"] }
+  ]
+}

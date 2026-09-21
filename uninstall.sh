@@ -33,6 +33,12 @@ if [[ -d $BGDIR ]]; then
   rm -rf "$BGDIR"; echo "removed $BGDIR"; removed=1
 fi
 
+FLAGS="$CONFIG/chromium-flags.conf"
+if [[ -w $FLAGS ]] && grep -q "whatsapp-omatrix" "$FLAGS"; then
+  sed -i 's|,[^,]*whatsapp-omatrix||g' "$FLAGS"
+  echo "unpatched $FLAGS"; removed=1
+fi
+
 WELCOME="$HOME/.local/bin/omarchy-terminal-welcome"
 if [[ -w $WELCOME ]] && grep -q '  omatrix)' "$WELCOME"; then
   sed -i '/# omatrix ships its own banner/d; /^  omatrix) exec /d' "$WELCOME"

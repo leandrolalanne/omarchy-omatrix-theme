@@ -40,6 +40,25 @@ install -m 755 "$SRC/hooks/post-boot.d-omatrix" "$BOOT_HOOKS/$SLUG"
 echo "linked   $HOOKS/$SLUG"
 echo "linked   $BOOT_HOOKS/$SLUG"
 
+# --- the WhatsApp Web extension ---
+# Chromium reads --load-extension once, at startup, from this file. The path
+# points straight at the source tree rather than a copy under webapps/, so the
+# extension is the repo and edits need no sync step. Idempotent; uninstall.sh
+# takes the entry back out.
+FLAGS="$CONFIG/chromium-flags.conf"
+EXT="$THEMES/$SLUG/webapps/whatsapp-omatrix"
+if [[ -w $FLAGS ]] && ! grep -q "whatsapp-omatrix" "$FLAGS"; then
+  if grep -q '^--load-extension=' "$FLAGS"; then
+    sed -i "s|^--load-extension=.*|&,$EXT|" "$FLAGS"
+    echo "patched  $FLAGS"
+    echo "         (Chromium must be restarted once to load it)"
+  else
+    printf -- '--load-extension=%s\n' "$EXT" >>"$FLAGS"
+    echo "patched  $FLAGS"
+  fi
+fi
+"$SRC/scripts/omatrix-whatsapp" >/dev/null 2>&1 || true
+
 # --- the terminal banner ---
 # omarchy-terminal-welcome is the user's own script and already branches per
 # theme (solaros, 640k). This adds one line that hands off to ours, placed

@@ -1,0 +1,108 @@
+/* WhatsApp Web — omatrix
+ *
+ * The greens are the theme's, which are the rain's, which are measured off
+ * Rezmason's reconstruction: hue 108, not the #00ff41 everyone reaches for.
+ *
+ * VERIFICATION STATUS. Every selector below marked PENDING was taken from the
+ * whatsapp-web-css skill's reference table -- anchors that worked in another
+ * stylesheet on this machine -- and has NOT yet been checked against the live
+ * DOM in this session. WhatsApp is compiled with StyleX: class names are
+ * per-build hashes and testids come and go, so a rule that looks right can be a
+ * silent no-op. They get verified against the running app before this is
+ * called done.
+ *
+ * Only presentation properties are touched. No display, no visibility, no
+ * explicit sizing on containers: in this app that combination has blanked out
+ * the chat list and the conversation pane outright.
+ */
+
+:root {
+  --omx-bg:        #000000;  /* the conversation canvas: black, as asked */
+  --omx-surface:   #070a0b;  /* panels and rows, the theme's background */
+  --omx-raised:    #0e1315;
+  --omx-fg:        #b0fa9e;
+  --omx-accent:    #89f76e;
+  --omx-dim:       #61c249;
+  --omx-muted:     #3d9926;
+  --omx-hot:       #d9ffff;  /* the leading glyph of a falling drop */
+  --omx-select:    #143a0c;
+  --omx-font:      "Courier Prime", "JetBrainsMono Nerd Font", monospace;
+}
+
+/* ---- generic: standard pseudo-elements, no WhatsApp anchor needed ---- */
+
+::selection {
+  background: var(--omx-select) !important;
+  color: var(--omx-hot) !important;
+}
+
+/* WhatsApp sets the standard scrollbar-color/width directly on its scrollable
+ * containers, and Chromium prefers those over ::-webkit-scrollbar-* whenever
+ * they are not `auto`. Resetting them first is what stops the rules below being
+ * silently ignored on exactly the panes that matter. */
+* {
+  scrollbar-color: auto !important;
+  scrollbar-width: auto !important;
+}
+::-webkit-scrollbar { width: 10px !important; height: 10px !important; }
+::-webkit-scrollbar-track { background: var(--omx-bg) !important; }
+::-webkit-scrollbar-thumb {
+  background: var(--omx-muted) !important;
+  border-radius: 0 !important;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--omx-accent) !important; }
+::-webkit-scrollbar-button { display: none !important; }
+
+/* ---- PENDING: everything below needs live-DOM verification ---- */
+
+/* Conversation canvas. */
+#main,
+#main [data-testid="conversation-panel-body"] {
+  background-color: var(--omx-bg) !important;
+  background-image: none !important;
+}
+
+/* Header and nav chrome. Both the token and the paint: WhatsApp's own
+ * translucent layer shows through if only one is overridden. */
+#app {
+  --WDS-components-surface-nav-bar: var(--omx-surface) !important;
+  --panel-header-background: var(--omx-surface) !important;
+}
+#app header,
+#app [role="navigation"] {
+  background-color: var(--omx-surface) !important;
+}
+
+/* Chat-list rows. */
+#pane-side [data-testid="cell-frame-container"] {
+  background-color: var(--omx-surface) !important;
+  border-radius: 0 !important;
+}
+[data-testid="cell-frame-container"][aria-selected="true"] {
+  background-color: var(--omx-raised) !important;
+  box-shadow: inset 3px 0 0 0 var(--omx-accent) !important;
+}
+
+/* Composer: a block caret, because this is a terminal. */
+#main footer [contenteditable="true"] {
+  caret-color: var(--omx-accent) !important;
+  caret-shape: block;
+  color: var(--omx-fg) !important;
+}
+#main footer div:has([contenteditable="true"]) {
+  background-color: var(--omx-surface) !important;
+  border-radius: 0 !important;
+}
+
+/* Read receipts. Anchored on the path's own `d`, since the icon carries no
+ * testid; its <svg> has <title>wds-ic-read</title>. */
+svg path[d^="M14.73 6.01a1 1 0 0 1 1.41-.15"] {
+  fill: var(--omx-accent) !important;
+}
+
+/* Type. Broad within its scope but safe: font-family never moves layout. */
+#side, #side *,
+#main, #main *,
+#app [role="navigation"], #app [role="navigation"] * {
+  font-family: var(--omx-font) !important;
+}

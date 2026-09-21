@@ -147,6 +147,7 @@ case "${theme_name,,}" in
     restore_ghostty_extra
     swap_branding on
     write_wakeup
+    "$HOME/.config/omarchy/themes/omatrix/scripts/omatrix-whatsapp" omatrix 2>/dev/null || true
     write_screensaver_conf
     # The decoration this theme wants is declared in hyprland.lua, and the other
     # hooks overwrote it at runtime after that file was loaded. Reload rather
@@ -164,6 +165,7 @@ case "${theme_name,,}" in
     # Only step in when leaving OUR font behind. If the user picked something
     # else by hand, a theme change has no business overriding it.
     swap_branding off
+    "$HOME/.config/omarchy/themes/omatrix/scripts/omatrix-whatsapp" "$theme_name" 2>/dev/null || true
     [[ $current_font == "$theme_font" ]] || exit 0
     write_font "$fallback_font" "$fallback_size"
     ;;

@@ -55,6 +55,17 @@ hl.config({
   },
 })
 
+-- WhatsApp Web is a Chromium webapp, so it has no background-opacity of its own
+-- the way a terminal does: the only way to make it translucent is the window
+-- itself. That fades the text along with the background, which is the trade --
+-- and the reason terminals and the bar do NOT get this treatment.
+--
+-- The class is the one Hyprland actually reports for the webapp window, read
+-- from `hyprctl clients`, not guessed from the URL.
+o.window("^chrome-web\\.whatsapp\\.com__-Default$", {
+  opacity = "0.90 override 0.90 override 0.90 override",
+})
+
 -- Shell surfaces, explicitly unblurred: another theme may have left global blur
 -- on, and its hook runs after this file is loaded.
 hl.layer_rule({

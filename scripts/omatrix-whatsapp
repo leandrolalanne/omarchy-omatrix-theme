@@ -1,0 +1,32 @@
+#!/bin/bash
+# Turn the WhatsApp Web styling on while omatrix is the active theme, off under
+# every other one.
+#
+# The extension stays loaded for all themes -- Chromium only reads
+# --load-extension at startup, so unloading it per theme would cost a browser
+# restart. Instead its content script polls active.css and injects whatever is
+# there, and this writes either the stylesheet or an inert file. Same shape as
+# the solaros and 640k ones already on this machine.
+#
+# The write is atomic: the poller can fire mid-write, and a half-written
+# stylesheet is a half-painted app.
+
+set -euo pipefail
+
+ext="$HOME/.config/omarchy/themes/omatrix/webapps/whatsapp-omatrix"
+theme="${1:-}"
+[[ -n $theme ]] || theme=$(cat "$HOME/.local/state/omarchy/current/theme.name" 2>/dev/null || true)
+
+[[ -d $ext ]] || exit 0
+
+case "${theme,,}" in
+  omatrix) src="$ext/omatrix.css" ;;
+  *)       src="$ext/off.css" ;;
+esac
+[[ -f $src ]] || exit 0
+
+tmp=$(mktemp "$ext/.active.css.XXXXXX")
+trap 'rm -f "$tmp"' EXIT
+cp "$src" "$tmp"
+mv -f "$tmp" "$ext/active.css"
+trap - EXIT
