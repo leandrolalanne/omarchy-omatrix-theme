@@ -66,13 +66,11 @@ omarchy theme set omatrix
 `uninstall.sh` undoes all of it and hands back anything it swapped. The theme
 ships static wallpapers, so it is complete on its own.
 
-> **Use those three lines, not `omarchy theme install`.** That command clones
-> the theme as a plain directory, and Omarchy holds a theme with a `.git` in it
-> to a shorter list: `hyprland.lua` is dropped, which is where the squared
-> corners and the blur setting live. It also never runs `install.sh`, so the
-> hooks, the background plugin, the terminal translucency and the banner are all
-> left out. Cloning yourself and running the installer links the theme instead,
-> and a link is staged whole.
+`omarchy theme install <url>` works too, and gives you the palette, the icons,
+the green borders and the square corners — Omarchy regenerates those from
+`colors.toml`. What it cannot give you is everything `install.sh` sets up: the
+typeface, the screensavers, the terminal translucency and its banner, the live
+backgrounds and the WhatsApp theme. Those need the three lines above.
 
 ### The rain
 
