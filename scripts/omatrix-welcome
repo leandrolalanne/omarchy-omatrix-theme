@@ -37,6 +37,14 @@
 
 set -u
 
+# Inert unless omatrix is the active theme. With this, the banner can be called
+# straight from a shell rc -- one line, no wrapper script -- and stays quiet
+# under every other theme. It runs on every new terminal, so the check is one
+# small read and nothing else.
+theme_file="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/current/theme.name"
+[[ -r $theme_file ]] || exit 0
+[[ "$(<"$theme_file")" == [Oo]matrix ]] || exit 0
+
 GREEN=$'\033[38;2;137;247;110m'   # the theme accent
 RESET=$'\033[0m'
 HIDE=$'\033[?25l'

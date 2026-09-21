@@ -44,6 +44,15 @@ trace that hunts Neo lands on this machine. It types itself out, and the digits
 of the address lock into place the way the phone number does in the scene. About
 360 ms, tunable to zero.
 
+It needs one line in your `~/.bashrc`, which `install.sh` prints rather than
+writes, since that file is yours:
+
+```bash
+~/.config/omarchy/themes/omatrix/scripts/omatrix-welcome
+```
+
+It prints nothing unless omatrix is the active theme.
+
 ## WhatsApp Web
 
 ![WhatsApp Web in the theme](docs/media/whatsapp.jpg)

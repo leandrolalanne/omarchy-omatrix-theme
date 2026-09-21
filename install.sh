@@ -102,6 +102,15 @@ if [[ -w $WELCOME ]] && ! grep -q '  omatrix)' "$WELCOME"; then
   else
     echo "NOTE: could not add the banner to $WELCOME; its shape has changed."
   fi
+elif [[ ! -e $WELCOME ]]; then
+  # Omarchy ships no terminal-welcome script and nothing calls one, so on a
+  # machine without the user's own there is no hook to patch. The banner is one
+  # line in a shell rc, and that file is the user's -- it is printed, not
+  # written, the same call matrix-rain makes about the terminal config.
+  echo
+  echo "Optional: the terminal banner. Add this to your ~/.bashrc:"
+  echo "      $THEMES/$SLUG/scripts/omatrix-welcome"
+  echo "  It prints nothing unless omatrix is the active theme."
 fi
 
 # --- the background machinery ---
