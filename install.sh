@@ -11,6 +11,7 @@
 set -uo pipefail
 
 SLUG="omatrix"
+WHO="${USER:-$(id -un)}"   # the plugin id omarchy gives a clone
 PLUGIN_ID="lean.omatrix"
 SRC="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -111,6 +112,24 @@ elif [[ ! -e $WELCOME ]]; then
   echo "Optional: the terminal banner. Add this to your ~/.bashrc:"
   echo "      $THEMES/$SLUG/scripts/omatrix-welcome"
   echo "  It prints nothing unless omatrix is the active theme."
+fi
+
+# --- the lock ---
+# Derived, not shipped: LockView.qml carries the password and fingerprint flows,
+# and a frozen copy of those is the last thing anyone wants. The script starts
+# from this machine's own copy every time, and the post-update hook runs it
+# again after every `omarchy update` so Omarchy's fixes keep reaching it. Under
+# any other theme the derived lock shows Omarchy's blurred wallpaper, untouched.
+UPDATE_HOOKS="$CONFIG/omarchy/hooks/post-update.d"
+if "$SRC/scripts/derive-lock.py"; then
+  mkdir -p "$UPDATE_HOOKS"
+  install -m 755 "$SRC/hooks/post-update.d-omatrix" "$UPDATE_HOOKS/$SLUG"
+  echo "linked   $UPDATE_HOOKS/$SLUG"
+  omarchy plugin enable "$WHO.lock" >/dev/null 2>&1 \
+    && echo "enabled  $WHO.lock" \
+    || echo "NOTE: could not enable $WHO.lock; run: omarchy plugin enable $WHO.lock"
+else
+  echo "NOTE: the lock was left as Omarchy's. Everything else is installed."
 fi
 
 # --- the background machinery ---

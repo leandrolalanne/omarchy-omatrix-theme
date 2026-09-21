@@ -209,6 +209,27 @@ FIELD_PATCHES = [
 ]
 
 
+def patch_placeholder(text):
+    """The tracking, which is most of what makes that lettering read as it does.
+
+    Measured: the advance is 1.41x the cap height where Courier Prime alone
+    gives 1.05, so 0.20 of the pixel size has to be added. Omarchy already
+    tracks the password DOTS at 0.19 of its heading size, which is as near the
+    film as makes no difference -- it is only the placeholder that is untracked.
+
+    A font property and nothing else: no geometry, no logic, no behaviour.
+    """
+    pattern = r"^([ \t]*)font\.pixelSize: root\.fieldFontSize$"
+    hits = re.findall(pattern, text, re.M)
+    if len(hits) != 1:
+        die(f"expected exactly one untracked placeholder size line, found {len(hits)}.")
+    return re.sub(
+        pattern,
+        r"\1font.pixelSize: root.fieldFontSize\n"
+        r"\1font.letterSpacing: root.omatrixActive ? root.fieldFontSize * 0.20 : 0",
+        text, flags=re.M)
+
+
 def patch_field(text):
     for pattern, replacement in FIELD_PATCHES:
         if len(re.findall(pattern, text)) != 1:
@@ -229,6 +250,7 @@ def main():
     text = patch_header(text)
     text = patch_background(text)
     text = patch_field(text)
+    text = patch_placeholder(text)
 
     staging = PLUGINS / f".{PLUGIN_ID}.staging"
     shutil.rmtree(staging, ignore_errors=True)
@@ -262,6 +284,15 @@ def main():
 
     shutil.rmtree(DEST, ignore_errors=True)
     staging.rename(DEST)
+    # Replacing the directory with a rename does not look like "a file was
+    # saved" to the plugin watcher, so the shell keeps running the old copy.
+    # Measured: the patch was in the file and the screen still showed the
+    # previous one until this was asked for explicitly.
+    shell = shutil.which("omarchy-shell")
+    if shell:
+        subprocess.run([shell, "-q", "shell", "rescanPlugins"],
+                       capture_output=True, timeout=10)
+
     print(f"derived  {DEST}")
     print(f"         from {SOURCE}/LockView.qml")
     print(f"         trace from {view}")

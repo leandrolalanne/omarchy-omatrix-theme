@@ -1,0 +1,32 @@
+# The lock's password field, measured off the box the film puts over the digit
+# field -- the one that reads SYSTEM FAILURE at the end. The geometry is applied
+# by scripts/derive-lock.py; the colour is applied here, because Omarchy already
+# has a supported place for it and a patched file is one more thing to re-derive.
+#
+#   border  rgb(69,89,96)    hue 196, saturation 16%
+#   fill    rgb(6,49,37)     hue 163
+#   text    rgb(16,154,117)  hue 164
+#
+# The border is the one deliberate departure in the whole frame. Everything else
+# in it -- the fill, the text, and the digits behind at hue 159-161 -- sits in
+# the same narrow band. The border sits thirty degrees away with almost no
+# saturation left, so it reads as chassis rather than as more code, and the box
+# does not dissolve into the field it covers.
+#
+# Opaque on purpose. Omarchy's default is 0.8 and the digits show straight
+# through the box; in the frame nothing behind it is visible at all.
+
+background       = "#063125"
+background-alpha = 1.0
+
+text             = "#109a75"
+placeholder      = "#0d7a5d"
+text-error       = "#b0fa9e"
+
+border           = "#455960"
+border-active    = "#455960"
+border-error     = "#89f76e"
+border-alpha     = 1.0
+
+selection        = "#109a75"
+selection-alpha  = 0.45

@@ -3,6 +3,7 @@
 set -uo pipefail
 
 SLUG="omatrix"
+WHO="${USER:-$(id -un)}"   # the plugin id omarchy gives a clone
 PLUGIN_ID="lean.omatrix"
 CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"
 
@@ -36,6 +37,21 @@ if [[ -f $FONT ]] && cmp -s "$FONT" "$MINE"; then
   rm -f "$FONT"
   command -v fc-cache >/dev/null && fc-cache -f "$(dirname "$FONT")" >/dev/null 2>&1
   echo "removed $FONT"; removed=1
+fi
+
+# The derived lock. Hand the native one back BEFORE removing ours: take the
+# directory away first and the session is left with no lock plugin at all.
+LOCK="$CONFIG/omarchy/plugins/$WHO.lock"
+if [[ -d $LOCK ]]; then
+  omarchy plugin enable omarchy.lock >/dev/null 2>&1
+  omarchy plugin disable "$WHO.lock" >/dev/null 2>&1
+  rm -rf "$LOCK"
+  omarchy-shell -q shell rescanPlugins >/dev/null 2>&1
+  echo "removed $LOCK (Omarchy's lock is back)"; removed=1
+fi
+if [[ -e $CONFIG/omarchy/hooks/post-update.d/$SLUG ]]; then
+  rm -f "$CONFIG/omarchy/hooks/post-update.d/$SLUG"
+  echo "removed $CONFIG/omarchy/hooks/post-update.d/$SLUG"; removed=1
 fi
 
 GHOSTTY="$CONFIG/ghostty/config"

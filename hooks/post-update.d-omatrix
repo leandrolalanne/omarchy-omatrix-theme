@@ -1,0 +1,5 @@
+#!/bin/bash
+# Re-derive the lock after an Omarchy update. The whole point of deriving rather
+# than shipping a LockView.qml is that the password and fingerprint flows stay
+# whatever Omarchy says they are -- which only holds if this runs.
+exec "$HOME/.config/omarchy/themes/omatrix/scripts/derive-lock.py"
