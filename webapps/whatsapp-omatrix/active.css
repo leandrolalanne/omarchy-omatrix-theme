@@ -201,6 +201,18 @@ svg:has(> mask > g > circle) > g[mask] { mask: none !important; }
   color: var(--omx-out-fg) !important;
 }
 
+/* The halo behind the chevron that appears on hover. WhatsApp paints it as
+ *   radial-gradient(circle at 100% 0%, rgb(20,77,55) 40%, rgba(20,77,55,0) 80%)
+ * -- in its OWN outgoing green, #144D37, not the theme's, which is why it reads
+ * as a different colour bleeding out of the corner. Only visible on hover, so
+ * it was found by dispatching pointerover on a bubble and then listing every
+ * gradient under a conv-msg: without that the whole app reports zero gradients.
+ *
+ * `.x10l6tqk` alone matches 53 elements; with the second class, exactly one. */
+#main [data-testid^="conv-msg-"] .x10l6tqk.x1jzctok.xceh6e4.xjhb59c {
+  background-image: none !important;
+}
+
 /* Read receipts: no testid on the icon, so anchored on the path's own `d`;
  * its <svg> carries <title>wds-ic-read</title>. 10 matches. */
 svg path[d^="M14.73 6.01a1 1 0 0 1 1.41-.15"] { fill: var(--omx-accent) !important; }
