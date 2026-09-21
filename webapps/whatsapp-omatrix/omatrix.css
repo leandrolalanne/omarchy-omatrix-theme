@@ -110,7 +110,13 @@
 #main [data-testid^="conv-msg-"] .x1liijdw.xelbjmh.x16pgt24,
 #main [data-testid^="conv-msg-"] .x1liijdw.xu342n7.xelbjmh,
 #pane-side [data-testid="cell-frame-container"],
+/* The composer. The grey pill carries a 26px radius on a div with no testid,
+ * no aria and no role -- StyleX hashes only -- and the three icon buttons
+ * inside it are 9999px with a 50% hover circle behind each. Rather than pin
+ * six rotting class names, everything inside the box is squared: the anchor is
+ * a stable testid, the region is small, and radius is presentation-only. */
 [data-testid="compose-box"],
+[data-testid="compose-box"] *,
 #main footer [contenteditable="true"],
 #side [role="tablist"] :where(button, [role="button"], [role="tab"]) {
   border-radius: 0 !important;
