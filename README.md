@@ -53,6 +53,28 @@ writes, since that file is yours:
 
 It prints nothing unless omatrix is the active theme.
 
+## The lock is the trace program
+
+![The lock: a field of digits, and the box from the film](docs/media/lock.jpg)
+
+The other thing *The Matrix* opens on. A field of digits in fixed cells, cycling
+in place — and the password box takes the shape of the one the film draws over
+that field: a thin light line, a black interior, green letters, tracked wide.
+
+It is **derived, not shipped**. `LockView.qml` carries the password and
+fingerprint flows, and a frozen copy of those is the last thing anyone wants
+standing between a stranger and their session. So `scripts/derive-lock.py`
+starts from the `LockView.qml` this machine has, changes only what the
+background is, and runs again after every `omarchy update` through a
+`post-update.d` hook — Omarchy's own fixes keep arriving. If its anchor is not
+found exactly once it writes nothing and leaves the native lock alone.
+
+And it is **guarded**: the derived lock is a user plugin, which is global, so it
+reads the active theme and shows the trace only while omatrix is on. Every other
+theme gets Omarchy's blurred wallpaper, untouched.
+
+The technique is tymurbogach's; the guard is the one thing added to it.
+
 ## WhatsApp Web
 
 ![WhatsApp Web in the theme](docs/media/whatsapp.jpg)
@@ -103,11 +125,13 @@ installs entirely under your home, no `sudo`. Re-run the theme's `install.sh`
 afterwards to copy the live backgrounds in, then cycle wallpapers with
 `Super+Ctrl+Space` until you reach one: selecting it turns the rain on.
 
-It also gives you the two commands this theme is built around:
+It also gives you the commands this theme is built around, and the trace the
+lock screen draws:
 
 ```bash
 matrix      # the rain as a window on the desktop, in five versions
 redpill     # the same rain inside the terminal you are typing in
+trace       # the trace program from the opening, in the terminal
 ```
 
 ### Pinning the screensaver
