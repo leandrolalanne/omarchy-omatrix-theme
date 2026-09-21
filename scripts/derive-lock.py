@@ -128,6 +128,16 @@ TraceView {
   visible: root.omatrixActive
   running: root.omatrixActive && root.loadBackground
   target: root.traceTarget
+
+  // The trace's own measured colour is a green with blue in it, at hue 159.
+  // This theme is hue 108 everywhere, so the field takes the palette the rest
+  // of the desktop uses. What is kept is the structure -- three tiers and a
+  // peak -- because that is what the frame actually establishes; the hue is
+  // the part that was only ever true of one transfer.
+  dim: "#1d4a12"
+  mid: "#3d9926"
+  bright: "#89f76e"
+  peak: "#d9ffff"
 }
 """
 
