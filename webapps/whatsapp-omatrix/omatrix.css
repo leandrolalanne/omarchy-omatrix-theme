@@ -3,13 +3,9 @@
  * The greens are the theme's, which are the rain's, which are measured off
  * Rezmason's reconstruction: hue 108, not the #00ff41 everyone reaches for.
  *
- * VERIFICATION STATUS. Every selector below marked PENDING was taken from the
- * whatsapp-web-css skill's reference table -- anchors that worked in another
- * stylesheet on this machine -- and has NOT yet been checked against the live
- * DOM in this session. WhatsApp is compiled with StyleX: class names are
- * per-build hashes and testids come and go, so a rule that looks right can be a
- * silent no-op. They get verified against the running app before this is
- * called done.
+ * VERIFIED against the live DOM over CDP on 2026-09-21, build
+ * Chrome/152.0.7977.82. Three of the skill's reference anchors did NOT survive
+ * that check and are corrected below; each carries the count it returned.
  *
  * Only presentation properties are touched. No display, no visibility, no
  * explicit sizing on containers: in this app that combination has blanked out
@@ -53,23 +49,61 @@
 ::-webkit-scrollbar-thumb:hover { background: var(--omx-accent) !important; }
 ::-webkit-scrollbar-button { display: none !important; }
 
-/* ---- PENDING: everything below needs live-DOM verification ---- */
+/* ---- bubbles ---- */
+/* WhatsApp publishes --incoming-background (#242626) and --outgoing-background
+ * (#144D37) on the document, which looked like the clean way in. Overriding
+ * them changes the variables and NOTHING on screen: the bubbles do not read
+ * them. Kept anyway, in case another surface does, but they are not what
+ * paints a bubble. */
+:root {
+  --incoming-background: var(--omx-raised) !important;
+  --outgoing-background: #123c0a !important;
+}
 
-/* Conversation canvas. */
+/* What paints a bubble is a StyleX class under msg-container. TWO classes are
+ * needed, not one: `.xu342n7` looks like the incoming marker and matches 19
+ * elements, but ELEVEN of those carry the outgoing colour -- using it alone
+ * would have recoloured eleven of the user's own messages as if they were
+ * received. Both pairs below match exactly the elements that really carry the
+ * bubble background: 8 incoming, 16 outgoing, counted by computed style.
+ *
+ * StyleX hashes rot on a WhatsApp deploy. To re-find them: list the children of
+ * [data-testid="msg-container"], split them by computed backgroundColor, and
+ * take the classes present in every element of one group and absent from the
+ * other. */
+#main [data-testid="msg-container"] > .xu342n7.x1ew7x2d {
+  background-color: var(--omx-raised) !important;   /* 15.16:1 under --omx-fg */
+}
+#main [data-testid="msg-container"] > .x1liijdw.x1g5lz36 {
+  background-color: #123c0a !important;             /* 10.15:1 under --omx-fg */
+}
+
+/* ---- verified selectors ---- */
+
+/* Conversation canvas (#main: 1 match, panel body: 1).
+ * The gradient is the "linear greens": black at the top going to a trace of
+ * phosphor at the bottom, the way a tube glows where the beam has been. */
 #main,
 #main [data-testid="conversation-panel-body"] {
   background-color: var(--omx-bg) !important;
-  background-image: none !important;
+  background-image: linear-gradient(180deg, #000000 0%, #03120a 100%) !important;
 }
 
 /* Header and nav chrome. Both the token and the paint: WhatsApp's own
- * translucent layer shows through if only one is overridden. */
+ * translucent layer shows through if only one is overridden.
+ *
+ * `#app [role="navigation"]` is GONE from the skill's table: this build has no
+ * such role at all (the roles present are button, grid, gridcell, group, none,
+ * row, status, tab, tablist, textbox). The left icon rail turns out to be a
+ * second `header[data-testid="chatlist-header"]`, 64 x 901 against the chat
+ * list header's 500 x 64 -- which is also why nothing here draws a
+ * border-bottom on that testid: it would run down the vertical rail too.
+ * `#app header` reaches both, 4 matches. */
 #app {
   --WDS-components-surface-nav-bar: var(--omx-surface) !important;
   --panel-header-background: var(--omx-surface) !important;
 }
-#app header,
-#app [role="navigation"] {
+#app header {
   background-color: var(--omx-surface) !important;
 }
 
@@ -78,7 +112,16 @@
   background-color: var(--omx-surface) !important;
   border-radius: 0 !important;
 }
-[data-testid="cell-frame-container"][aria-selected="true"] {
+/* The open chat's row. NOT [aria-selected="true"] -- in this build that lives on
+ * the filter tabs (button[role="tab"], 69 x 32), never on a row, and matched
+ * zero. Confirmed the honest way instead: read the open chat's name out of
+ * #main's header, find the row carrying it, and diff its classes against the
+ * other 22. Exactly one class was unique to it.
+ *
+ * A StyleX hash, so it WILL rot on a WhatsApp deploy. Scoped under the stable
+ * testid so that when it does, it fails to nothing rather than to something
+ * else. Re-find it the same way. */
+#pane-side [data-testid="cell-frame-container"].x4wrhlh {
   background-color: var(--omx-raised) !important;
   box-shadow: inset 3px 0 0 0 var(--omx-accent) !important;
 }
@@ -89,7 +132,11 @@
   caret-shape: block;
   color: var(--omx-fg) !important;
 }
-#main footer div:has([contenteditable="true"]) {
+/* The composer bar. `div:has([contenteditable="true"])` matched SIX nested
+ * wrappers, which is the doubling the skill warns about; the narrowing it
+ * suggests cannot be used here because CSS forbids :has() inside :has() and
+ * Chromium rejects the whole selector. This testid matches exactly one. */
+[data-testid="compose-box"] {
   background-color: var(--omx-surface) !important;
   border-radius: 0 !important;
 }
