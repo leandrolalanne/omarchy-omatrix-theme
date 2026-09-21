@@ -34,12 +34,11 @@ hl.config({
   },
 
   decoration = {
-    -- Small on purpose: the film's terminals have square corners, and this is
-    -- only enough to keep a window from looking like a raw rectangle. No
-    -- rounding_power set with it -- the superellipse exponent is what stops a
-    -- large radius pinching where the straight edge meets the curve, and at 3
-    -- there is nothing to pinch.
-    rounding = 3,
+    -- Square. The film's terminals have square corners, and by the time the
+    -- chat app, the bubbles, the rows and the avatars are all square, 3 px on
+    -- the window frame is the one rounded thing left on screen and reads as a
+    -- mistake. No rounding_power either: there is no curve left to shape.
+    rounding = 0,
 
     blur = {
       enabled = false,
