@@ -158,6 +158,27 @@
  *                  ^ defines the shape              ^ the one to clear          */
 svg:has(> mask > g > circle) > g[mask] { mask: none !important; }
 
+/* A green edge on the profile photos: 17 in the list rows at 48px, one in the
+ * conversation header at 40, and the small 24px one in the side header.
+ *
+ * It has to be `outline` ON THE <svg> ITSELF. A border on the wrapper does not
+ * reach content painted through the mask -- the same reason border-radius and
+ * filter both no-op'd here -- and `border` on an SVG element is not painted at
+ * all. The offset pulls it inside the box so it lands on the squared edge of
+ * the photo instead of bleeding into the row.
+ *
+ * The fallback avatar carries no mask, so it takes the same edge on its own
+ * wrapper. The exclusion keeps a wrapper that DOES hold one from drawing a
+ * second line a pixel off the first. It cannot be written as the skill
+ * suggests, `:not(:has(svg:has(...)))`, because :has() may not nest -- Chromium
+ * drops the whole rule. Matching any descendant mask is valid and does the same
+ * job here. */
+svg:has(> mask > g > circle),
+[data-testid="subgroup-identity"]:not(:has(mask)) {
+  outline: 1px solid var(--omx-line) !important;
+  outline-offset: -1px !important;
+}
+
 /* The search field's painted surface is an ancestor of its semantic input. */
 #side :where(div, form):has(:where(
   input[type="search"], [role="searchbox"],
