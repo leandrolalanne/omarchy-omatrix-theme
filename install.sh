@@ -155,8 +155,11 @@ else
   echo "NOTE: could not enable $PLUGIN_ID; run: omarchy plugin enable $PLUGIN_ID"
 fi
 
-# Deliberately not done here: it needs root and writes outside $HOME.
-if [[ ! -e /usr/local/bin/omarchy-screensaver ]]; then
+# Deliberately not done here: it needs root and writes outside $HOME. The shims
+# are ttfx and ghostty -- omarchy-screensaver was an earlier attempt that the
+# login PATH never reached, and testing for it meant this note printed even
+# after the shims were installed.
+if [[ ! -e /usr/local/bin/ttfx ]]; then
   echo
   echo "Optional: Omarchy's screensaver picks a random effect, so it lands on"
   echo "fireworks as often as on the rain. To pin it to the matrix effect while"

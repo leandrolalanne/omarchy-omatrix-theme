@@ -66,9 +66,12 @@ if [[ -d $STATE ]]; then
   rm -rf "$STATE"; echo "removed $STATE"; removed=1
 fi
 
-# The screensaver shim is the one thing that lives outside $HOME, so it is not
-# removed here: this script does not ask for root, and should not.
-if [[ -e /usr/local/bin/omarchy-screensaver ]]; then
+# The screensaver shims are the one thing that lives outside $HOME, so they are
+# not removed here: this script does not ask for root, and should not. They are
+# ttfx and ghostty; the old omarchy-screensaver name this used to test for is
+# never installed, so the warning never fired and root-owned files were left
+# behind without a word.
+if [[ -e /usr/local/bin/ttfx || -e /usr/local/bin/ghostty ]]; then
   echo
   echo "NOTE: the forced matrix screensaver effect is still installed. Remove it with:"
   echo "      sudo $(dirname "${BASH_SOURCE[0]}")/scripts/install-screensaver-effect.sh --remove"
