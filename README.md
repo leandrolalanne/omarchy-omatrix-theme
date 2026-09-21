@@ -57,7 +57,7 @@ DOM.
 ## Install
 
 ```bash
-git clone https://github.com/<you>/omarchy-matrix-theme ~/.config/omarchy/themes/omatrix
+git clone https://github.com/leandrolalanne/omarchy-omatrix-theme ~/.config/omarchy/themes/omatrix
 ~/.config/omarchy/themes/omatrix/install.sh
 omarchy theme set omatrix
 ```
@@ -65,6 +65,14 @@ omarchy theme set omatrix
 `install.sh` links the theme, its hooks and the background plugin.
 `uninstall.sh` undoes all of it and hands back anything it swapped. The theme
 ships static wallpapers, so it is complete on its own.
+
+> **Use those three lines, not `omarchy theme install`.** That command clones
+> the theme as a plain directory, and Omarchy holds a theme with a `.git` in it
+> to a shorter list: `hyprland.lua` is dropped, which is where the squared
+> corners and the blur setting live. It also never runs `install.sh`, so the
+> hooks, the background plugin, the terminal translucency and the banner are all
+> left out. Cloning yourself and running the installer links the theme instead,
+> and a link is staged whole.
 
 ### The rain
 
