@@ -27,8 +27,9 @@
 # COST. This runs on every new terminal and the shell shows no prompt until it
 # returns. Both speeds are knobs, and either at 0 turns that part off:
 #
-#     OMATRIX_TYPE_STEP     seconds per character   default 0.012
-#     OMATRIX_TRACE_STEP    seconds per lock frame  default 0.025
+#     OMATRIX_TYPE_STEP     seconds per character   default 0.006
+#     OMATRIX_TRACE_STEP    seconds per lock frame  default 0.0125
+#     OMATRIX_DOT_STEP      seconds per dot         default 0.13
 #
 # Delays are a timed read on a fifo rather than `sleep`, which would fork ~130
 # times in a shell's startup path. Measured over 100 delays: 1279 ms of forks
@@ -41,8 +42,9 @@ RESET=$'\033[0m'
 HIDE=$'\033[?25l'
 SHOW=$'\033[?25h'
 
-TYPE=${OMATRIX_TYPE_STEP:-0.012}
-STEP=${OMATRIX_TRACE_STEP:-0.025}
+TYPE=${OMATRIX_TYPE_STEP:-0.006}
+STEP=${OMATRIX_TRACE_STEP:-0.0125}
+DOT=${OMATRIX_DOT_STEP:-0.13}
 
 when=$(date '+%-m-%-d-%y %H:%M:%S')
 
@@ -91,7 +93,18 @@ printf '\n%s%s' "$HIDE" "$GREEN"
 trap 'printf "%s%s" "$RESET" "$SHOW"' EXIT
 
 type_out "$L1"; printf '\n'
-type_out "$L2"; printf '\n'
+type_out "$L2"
+# The dots run twice: they appear one at a time, clear, and come again, which is
+# what a program that is still working looks like. They are a beat, not a wait,
+# so they get their own speed -- the rest of the banner is a machine printing and
+# would look wrong at this rate.
+for (( c = 0; c < 2; c++ )); do
+  for (( d = 0; d < 3; d++ )); do
+    printf '.'; pause "$DOT"
+  done
+  (( c == 0 )) && { printf '\b\b\b   \b\b\b'; pause "$DOT"; }
+done
+printf '\n'
 type_out "$LEAD"
 
 for (( k = 0; k <= ${#origin}; k++ )); do
