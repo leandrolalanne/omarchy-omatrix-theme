@@ -129,7 +129,9 @@ measuring against frames of the film — and that Bold is the weight. Its
 stylesheet also worked out how WhatsApp's bubble corners are set, which this
 reuses.
 
-`fonts/` carries White Rabbit by Matthew Welch, MIT, with its licence.
+The typeface is Courier Prime by Alan Dague-Greene for Quote-Unquote Apps,
+under the SIL Open Font License. `fonts/` carries the Bold face and the licence,
+and `install.sh` puts it under your home.
 
 Screensaver effects are [ttfx](https://github.com/omacom-io/ttfx), a Rust port
 of terminaltexteffects, and the icons are Yaru.

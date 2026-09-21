@@ -28,6 +28,16 @@ if [[ -f $SAVED ]]; then
   echo "restored $CONFIG/omarchy/branding/screensaver.txt"; removed=1
 fi
 
+# Only the copy install.sh put here, and only when it is byte-identical to the
+# one shipped: a font the user installed themselves is theirs.
+FONT="$HOME/.local/share/fonts/CourierPrime-Bold.ttf"
+MINE="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/fonts/CourierPrime-Bold.ttf"
+if [[ -f $FONT ]] && cmp -s "$FONT" "$MINE"; then
+  rm -f "$FONT"
+  command -v fc-cache >/dev/null && fc-cache -f "$(dirname "$FONT")" >/dev/null 2>&1
+  echo "removed $FONT"; removed=1
+fi
+
 GHOSTTY="$CONFIG/ghostty/config"
 if [[ -w $GHOSTTY ]] && grep -qF 'current/theme/omatrix.conf' "$GHOSTTY"; then
   sed -i '/# omatrix: terminal translucency/d; \|current/theme/omatrix\.conf|d' "$GHOSTTY"

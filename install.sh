@@ -28,6 +28,20 @@ mkdir -p "$THEMES"
 ln -sfn "$SRC" "$THEMES/$SLUG"
 echo "linked   $THEMES/$SLUG"
 
+# --- the typeface ---
+# Courier Prime Bold is the first thing the theme claims, and the hook asks for
+# it by family name -- so it has to BE on the machine, not assumed to be. Only
+# the Bold face is shipped, which is also what makes `font-style = Regular` in
+# Omarchy's stock ghostty config harmless: with no Regular installed, the family
+# resolves to Bold. It goes under $HOME, no root, and uninstall.sh removes it.
+FONTDIR="$HOME/.local/share/fonts"
+if [[ ! -f $FONTDIR/CourierPrime-Bold.ttf ]]; then
+  mkdir -p "$FONTDIR"
+  install -m 644 "$SRC/fonts/CourierPrime-Bold.ttf" "$FONTDIR/"
+  command -v fc-cache >/dev/null && fc-cache -f "$FONTDIR" >/dev/null 2>&1
+  echo "installed $FONTDIR/CourierPrime-Bold.ttf"
+fi
+
 # --- terminal translucency ---
 # omatrix.conf travels inside the theme, so Omarchy stages it under
 # current/theme/ on `theme set`. Under any other theme it is simply not there

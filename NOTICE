@@ -7,8 +7,9 @@ matrix-rain (https://github.com/leandrolalanne/matrix-rain).
 
 backgrounds/07-crt-late-night.webp comes from the SolarOS theme.
 
-fonts/WhiteRabbit.ttf is White Rabbit by Matthew Welch, MIT. Its licence is
-kept beside it in fonts/WhiteRabbit-LICENSE.txt. It is shipped but not used.
+fonts/CourierPrime-Bold.ttf is Courier Prime by Alan Dague-Greene for
+Quote-Unquote Apps, under the SIL Open Font License 1.1. The licence is kept
+beside it in fonts/CourierPrime-LICENSE.txt.
 
 Courier Prime is under the SIL Open Font License and is not redistributed here;
 the theme names it and expects it installed.
