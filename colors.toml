@@ -17,7 +17,7 @@
 # dark_foreground and muted are further up the ramp than the rain's own stops.
 # That is the terminal's translucency paying for itself: at 0.80 opacity the
 # dimmest text is what runs out of contrast first, so those two are set from the
-# alpha rather than the other way round. See ghostty-extra.conf.
+# alpha rather than the other way round. See omatrix.conf.
 #
 # The ANSI slots are monochrome on purpose: everything lives inside the green
 # family, the way an operator's screen does. That costs legibility where colour

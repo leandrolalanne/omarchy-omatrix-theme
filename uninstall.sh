@@ -28,6 +28,12 @@ if [[ -f $SAVED ]]; then
   echo "restored $CONFIG/omarchy/branding/screensaver.txt"; removed=1
 fi
 
+GHOSTTY="$CONFIG/ghostty/config"
+if [[ -w $GHOSTTY ]] && grep -qF 'current/theme/omatrix.conf' "$GHOSTTY"; then
+  sed -i '/# omatrix: terminal translucency/d; \|current/theme/omatrix\.conf|d' "$GHOSTTY"
+  echo "unpatched $GHOSTTY"; removed=1
+fi
+
 BGDIR="$CONFIG/omarchy/backgrounds/$SLUG"
 if [[ -d $BGDIR ]]; then
   rm -rf "$BGDIR"; echo "removed $BGDIR"; removed=1

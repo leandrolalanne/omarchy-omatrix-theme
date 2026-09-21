@@ -12,7 +12,7 @@
 -- Note what is NOT set: active_opacity / inactive_opacity. Window opacity fades
 -- the text along with the background and throws away the contrast the palette
 -- is defending. Translucency belongs to the terminal itself
--- (ghostty-extra.conf) and to the shell surfaces (shell.bar.toml), where only
+-- (omatrix.conf) and to the shell surfaces (shell.bar.toml), where only
 -- the background goes through and glyphs stay opaque.
 
 local active_border_color = { colors = { "rgba(89f76eee)", "rgba(61c249ee)" }, angle = 45 }

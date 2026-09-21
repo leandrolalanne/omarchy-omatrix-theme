@@ -28,11 +28,27 @@ mkdir -p "$THEMES"
 ln -sfn "$SRC" "$THEMES/$SLUG"
 echo "linked   $THEMES/$SLUG"
 
+# --- terminal translucency ---
+# omatrix.conf travels inside the theme, so Omarchy stages it under
+# current/theme/ on `theme set`. Under any other theme it is simply not there
+# and the `?` makes the include a no-op, which is what turns the translucency
+# back off. Idempotent; uninstall.sh takes the line out again.
+GHOSTTY="$CONFIG/ghostty/config"
+GINCLUDE='config-file = ?"~/.local/state/omarchy/current/theme/omatrix.conf"'
+if [[ -f $GHOSTTY ]] && grep -qF 'current/theme/omatrix.conf' "$GHOSTTY"; then
+  :
+elif [[ -w $GHOSTTY ]]; then
+  printf '\n# omatrix: terminal translucency, only while omatrix is the theme\n%s\n' \
+    "$GINCLUDE" >>"$GHOSTTY"
+  echo "patched  $GHOSTTY"
+else
+  echo "NOTE: could not write $GHOSTTY. For terminal translucency, add:"
+  echo "      $GINCLUDE"
+fi
+
 # --- the hook, on both chains ---
-# theme-set.d for switching, post-boot.d because the hooks that truncate
-# ghostty-extra.conf run at boot as well. The name matters: hooks run
-# alphabetically and this has to sort AFTER the ones it repairs after
-# (ayaka-smoky, liquid-glass-material).
+# theme-set.d for switching, post-boot.d because the font and the screensaver
+# branding have to be re-asserted at boot too.
 BOOT_HOOKS="$CONFIG/omarchy/hooks/post-boot.d"
 mkdir -p "$HOOKS" "$BOOT_HOOKS"
 install -m 755 "$SRC/hooks/theme-set.d-omatrix" "$HOOKS/$SLUG"

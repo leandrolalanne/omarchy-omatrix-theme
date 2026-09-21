@@ -12,16 +12,6 @@
 #    back on the way out -- the first swap keeps a copy, so what is restored is
 #    whatever was there before omatrix, not an assumption about it.
 #
-# 3. ghostty-extra.conf. Other themes ship hooks whose `else` branch runs for
-#    every theme that is not their own; ayaka-smoky's truncates that file and
-#    forces blur off and rounding 0. Hooks run alphabetically and ayaka sorts
-#    before omatrix, so it fires first and this puts the file back. Without
-#    this, the terminal's translucency is silently reverted every time the
-#    theme is applied -- it looks like the setting never worked.
-#
-# `omarchy font set` is global and permanent -- it has no notion of a theme --
-# so this hook is what makes it behave as though the font belonged to omatrix.
-#
 # Why Courier Prime, and why Bold: the lines on Neo's monitor (`Wake up,
 # Neo...`) are set in a typewriter serif monospace, not the pixel or techno face
 # the internet usually reaches for. tymurbogach's enter-the-matrix theme
@@ -86,7 +76,7 @@ write_screensaver_conf() {
     mkdir -p "$dir" || return 0
     cat > "$dir/screensaver.conf" <<CONF
 # Loaded only by the screensaver, through the ghostty shim. The theme's own
-# ghostty-extra.conf makes terminals translucent; a screensaver must not be.
+# omatrix.conf makes terminals translucent; a screensaver must not be.
 background-opacity = 1
 CONF
     return 0
@@ -133,18 +123,8 @@ swap_branding() {
     return 0
 }
 
-restore_ghostty_extra() {
-  local src="$HOME/.config/omarchy/themes/omatrix/ghostty-extra.conf"
-  local dst="$HOME/.local/state/omarchy/current/theme/ghostty-extra.conf"
-  [[ -f $src ]] || return 0
-  cmp -s "$src" "$dst" 2>/dev/null && return 0
-  cp "$src" "$dst" && pkill -SIGUSR2 ghostty 2>/dev/null
-  return 0
-}
-
 case "${theme_name,,}" in
   omatrix)
-    restore_ghostty_extra
     swap_branding on
     write_wakeup
     "$HOME/.config/omarchy/themes/omatrix/scripts/omatrix-whatsapp" omatrix 2>/dev/null || true
