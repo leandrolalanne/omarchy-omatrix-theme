@@ -27,9 +27,9 @@
 # COST. This runs on every new terminal and the shell shows no prompt until it
 # returns. Both speeds are knobs, and either at 0 turns that part off:
 #
-#     OMATRIX_TYPE_STEP     seconds per character   default 0.006
-#     OMATRIX_TRACE_STEP    seconds per lock frame  default 0.0125
-#     OMATRIX_DOT_STEP      seconds per dot         default 0.13
+#     OMATRIX_TYPE_STEP     seconds per character   default 0.003
+#     OMATRIX_TRACE_STEP    seconds per lock frame  default 0.00625
+#     OMATRIX_DOT_STEP      seconds per dot         default 0.065
 #
 # Delays are a timed read on a fifo rather than `sleep`, which would fork ~130
 # times in a shell's startup path. Measured over 100 delays: 1279 ms of forks
@@ -42,9 +42,9 @@ RESET=$'\033[0m'
 HIDE=$'\033[?25l'
 SHOW=$'\033[?25h'
 
-TYPE=${OMATRIX_TYPE_STEP:-0.006}
-STEP=${OMATRIX_TRACE_STEP:-0.0125}
-DOT=${OMATRIX_DOT_STEP:-0.13}
+TYPE=${OMATRIX_TYPE_STEP:-0.003}
+STEP=${OMATRIX_TRACE_STEP:-0.00625}
+DOT=${OMATRIX_DOT_STEP:-0.065}
 
 when=$(date '+%-m-%-d-%y %H:%M:%S')
 
