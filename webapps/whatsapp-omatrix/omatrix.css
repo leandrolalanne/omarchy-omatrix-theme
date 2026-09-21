@@ -1,155 +1,211 @@
 /* WhatsApp Web — omatrix
  *
- * The greens are the theme's, which are the rain's, which are measured off
- * Rezmason's reconstruction: hue 108, not the #00ff41 everyone reaches for.
+ * Black, square, and lined in green: a terminal, not a chat app. Built to the
+ * same concept as the 640k theme on this machine, whose stylesheet also
+ * supplied two hard-won findings reused below.
  *
- * VERIFIED against the live DOM over CDP on 2026-09-21, build
- * Chrome/152.0.7977.82. Three of the skill's reference anchors did NOT survive
- * that check and are corrected below; each carries the count it returned.
- *
- * Only presentation properties are touched. No display, no visibility, no
- * explicit sizing on containers: in this app that combination has blanked out
- * the chat list and the conversation pane outright.
+ * Verified against the live DOM over CDP, build Chrome/152.0.7977.82. Counts in
+ * the comments are what each selector returned. WhatsApp is compiled with
+ * StyleX, so the x-hashes WILL rot on a deploy; each one says how to re-find it.
  */
 
 :root {
-  --omx-bg:        #000000;  /* the conversation canvas: black, as asked */
-  --omx-surface:   #070a0b;  /* panels and rows, the theme's background */
-  --omx-raised:    #0e1315;
-  --omx-fg:        #b0fa9e;
-  --omx-accent:    #89f76e;
-  --omx-dim:       #61c249;
-  --omx-muted:     #3d9926;
-  --omx-hot:       #d9ffff;  /* the leading glyph of a falling drop */
-  --omx-select:    #143a0c;
-  --omx-font:      "Courier Prime", "JetBrainsMono Nerd Font", monospace;
+  --omx-black:   #000000;
+  --omx-surface: #070a0b;
+  --omx-line:    #3d9926;  /* the green the lines are drawn in */
+  --omx-line-dim:#1d4a12;
+  --omx-fg:      #b0fa9e;
+  --omx-accent:  #89f76e;
+  --omx-in-bg:   #151515;  /* grey, neutral: no blue in it */
+  --omx-in-fg:   #b0fa9e;  /* green letters on the grey */
+  --omx-out-bg:  #123c0a;  /* the matrix green */
+  --omx-out-fg:  #ffffff;  /* white letters on the green */
+  --omx-font:    "Courier Prime", "JetBrainsMono Nerd Font", monospace;
 }
 
-/* ---- generic: standard pseudo-elements, no WhatsApp anchor needed ---- */
+/* ---- generic ---- */
 
-::selection {
-  background: var(--omx-select) !important;
-  color: var(--omx-hot) !important;
-}
+::selection { background: #143a0c !important; color: #d9ffff !important; }
 
-/* WhatsApp sets the standard scrollbar-color/width directly on its scrollable
+/* WhatsApp sets the standard scrollbar-color/width on its scrollable
  * containers, and Chromium prefers those over ::-webkit-scrollbar-* whenever
- * they are not `auto`. Resetting them first is what stops the rules below being
- * silently ignored on exactly the panes that matter. */
-* {
-  scrollbar-color: auto !important;
-  scrollbar-width: auto !important;
-}
+ * they are not `auto`. Resetting them is what stops the rules below being
+ * ignored on exactly the panes that matter. */
+* { scrollbar-color: auto !important; scrollbar-width: auto !important; }
 ::-webkit-scrollbar { width: 10px !important; height: 10px !important; }
-::-webkit-scrollbar-track { background: var(--omx-bg) !important; }
-::-webkit-scrollbar-thumb {
-  background: var(--omx-muted) !important;
-  border-radius: 0 !important;
-}
-::-webkit-scrollbar-thumb:hover { background: var(--omx-accent) !important; }
+::-webkit-scrollbar-track { background: var(--omx-black) !important; }
+::-webkit-scrollbar-thumb { background: var(--omx-line-dim) !important; border-radius: 0 !important; }
+::-webkit-scrollbar-thumb:hover { background: var(--omx-line) !important; }
 ::-webkit-scrollbar-button { display: none !important; }
 
-/* ---- bubbles ---- */
-/* WhatsApp publishes --incoming-background (#242626) and --outgoing-background
- * (#144D37) on the document, which looked like the clean way in. Overriding
- * them changes the variables and NOTHING on screen: the bubbles do not read
- * them. Kept anyway, in case another surface does, but they are not what
- * paints a bubble. */
-:root {
-  --incoming-background: var(--omx-raised) !important;
-  --outgoing-background: #123c0a !important;
-}
+/* ---- surfaces: black everywhere ---- */
 
-/* What paints a bubble is a StyleX class under msg-container. TWO classes are
- * needed, not one: `.xu342n7` looks like the incoming marker and matches 19
- * elements, but ELEVEN of those carry the outgoing colour -- using it alone
- * would have recoloured eleven of the user's own messages as if they were
- * received. Both pairs below match exactly the elements that really carry the
- * bubble background: 8 incoming, 16 outgoing, counted by computed style.
- *
- * StyleX hashes rot on a WhatsApp deploy. To re-find them: list the children of
- * [data-testid="msg-container"], split them by computed backgroundColor, and
- * take the classes present in every element of one group and absent from the
- * other. */
-#main [data-testid="msg-container"] > .xu342n7.x1ew7x2d {
-  background-color: var(--omx-raised) !important;   /* 15.16:1 under --omx-fg */
-}
-#main [data-testid="msg-container"] > .x1liijdw.x1g5lz36 {
-  background-color: #123c0a !important;             /* 10.15:1 under --omx-fg */
-}
-
-/* ---- verified selectors ---- */
-
-/* Conversation canvas (#main: 1 match, panel body: 1).
- * The gradient is the "linear greens": black at the top going to a trace of
- * phosphor at the bottom, the way a tube glows where the beam has been. */
+/* #main: 1. panel body: 1. */
 #main,
 #main [data-testid="conversation-panel-body"] {
-  background-color: var(--omx-bg) !important;
-  background-image: linear-gradient(180deg, #000000 0%, #03120a 100%) !important;
+  background-color: var(--omx-black) !important;
+  background-image: none !important;
 }
 
-/* Header and nav chrome. Both the token and the paint: WhatsApp's own
- * translucent layer shows through if only one is overridden.
- *
- * `#app [role="navigation"]` is GONE from the skill's table: this build has no
- * such role at all (the roles present are button, grid, gridcell, group, none,
- * row, status, tab, tablist, textbox). The left icon rail turns out to be a
- * second `header[data-testid="chatlist-header"]`, 64 x 901 against the chat
- * list header's 500 x 64 -- which is also why nothing here draws a
- * border-bottom on that testid: it would run down the vertical rail too.
- * `#app header` reaches both, 4 matches. */
+/* `#app [role="navigation"]` is NOT here: this build has no navigation role at
+ * all, and that rule matched zero. The left icon rail turns out to be a second
+ * header[data-testid="chatlist-header"] -- 64 x 901, against the chat list
+ * header's 500 x 64 -- which is also why no border-bottom is drawn on that
+ * testid: it would run down the vertical rail. `#app header` reaches both, 4. */
 #app {
-  --WDS-components-surface-nav-bar: var(--omx-surface) !important;
-  --panel-header-background: var(--omx-surface) !important;
+  --WDS-components-surface-nav-bar: var(--omx-black) !important;
+  --panel-header-background: var(--omx-black) !important;
 }
-#app header {
-  background-color: var(--omx-surface) !important;
+#app header,
+#side,
+#pane-side {
+  background-color: var(--omx-black) !important;
 }
 
-/* Chat-list rows. */
+/* ---- the green lines ---- */
+
+#app header { border-bottom: 1px solid var(--omx-line-dim) !important; }
+
+/* Chat rows: 23. A line under each, and the open one gets a full green rail. */
 #pane-side [data-testid="cell-frame-container"] {
-  background-color: var(--omx-surface) !important;
-  border-radius: 0 !important;
+  background-color: var(--omx-black) !important;
+  border-bottom: 1px solid var(--omx-line-dim) !important;
 }
-/* The open chat's row. NOT [aria-selected="true"] -- in this build that lives on
- * the filter tabs (button[role="tab"], 69 x 32), never on a row, and matched
- * zero. Confirmed the honest way instead: read the open chat's name out of
- * #main's header, find the row carrying it, and diff its classes against the
- * other 22. Exactly one class was unique to it.
- *
- * A StyleX hash, so it WILL rot on a WhatsApp deploy. Scoped under the stable
- * testid so that when it does, it fails to nothing rather than to something
- * else. Re-find it the same way. */
+
+/* The open chat's row. NOT [aria-selected="true"] -- in this build that is on
+ * the filter tabs (button[role="tab"], 69 x 32) and matched zero on rows.
+ * Found instead by reading the open chat's name out of #main's header, locating
+ * the row carrying it, and diffing its classes against the other 22: exactly
+ * one was unique to it. Re-find it the same way when it rots. */
 #pane-side [data-testid="cell-frame-container"].x4wrhlh {
-  background-color: var(--omx-raised) !important;
+  background-color: #0e1315 !important;
   box-shadow: inset 3px 0 0 0 var(--omx-accent) !important;
 }
 
-/* Composer: a block caret, because this is a terminal. */
+/* The composer bar. `div:has([contenteditable="true"])` matched SIX nested
+ * wrappers; the narrowing the skill suggests is invalid CSS, since :has()
+ * cannot nest inside :has() and Chromium rejects the whole selector. This
+ * testid matches one. */
+[data-testid="compose-box"] {
+  background-color: var(--omx-black) !important;
+  border-top: 1px solid var(--omx-line-dim) !important;
+}
 #main footer [contenteditable="true"] {
   caret-color: var(--omx-accent) !important;
   caret-shape: block;
   color: var(--omx-fg) !important;
 }
-/* The composer bar. `div:has([contenteditable="true"])` matched SIX nested
- * wrappers, which is the doubling the skill warns about; the narrowing it
- * suggests cannot be used here because CSS forbids :has() inside :has() and
- * Chromium rejects the whole selector. This testid matches exactly one. */
-[data-testid="compose-box"] {
-  background-color: var(--omx-surface) !important;
+
+/* ---- square, everywhere ---- */
+
+/* WhatsApp sets LOGICAL radius properties, so the shorthand alone loses. And
+ * the corners live on three different class combinations, which is the finding
+ * the 640k stylesheet paid for and this reuses: the full four-class
+ * intersection carries a uniform 7.5px (28 elements), while the first message
+ * of each consecutive group omits one flatten class and keeps a radius on its
+ * tail corner -- 0px 7.5px 7.5px on incoming (5) and 7.5px 0px 7.5px 7.5px on
+ * outgoing (5). All three combinations, or the group heads stay rounded. */
+#main [data-testid^="conv-msg-"] .x1liijdw.xu342n7.xelbjmh.x16pgt24,
+#main [data-testid^="conv-msg-"] .xu342n7.xelbjmh.x16pgt24,
+#main [data-testid^="conv-msg-"] .x1liijdw.xelbjmh.x16pgt24,
+#main [data-testid^="conv-msg-"] .x1liijdw.xu342n7.xelbjmh,
+#pane-side [data-testid="cell-frame-container"],
+[data-testid="compose-box"],
+#main footer [contenteditable="true"],
+#side [role="tablist"] :where(button, [role="button"], [role="tab"]) {
   border-radius: 0 !important;
+  border-start-start-radius: 0 !important;
+  border-start-end-radius: 0 !important;
+  border-end-end-radius: 0 !important;
+  border-end-start-radius: 0 !important;
 }
 
-/* Read receipts. Anchored on the path's own `d`, since the icon carries no
- * testid; its <svg> has <title>wds-ic-read</title>. */
-svg path[d^="M14.73 6.01a1 1 0 0 1 1.41-.15"] {
-  fill: var(--omx-accent) !important;
+/* What was still round after the rules above, found by walking every element
+ * under a conv-msg and listing the non-zero radii: a link preview card and the
+ * reaction button, both with their own testid, and the quoted-reply bar, which
+ * has none. */
+#main [data-testid="link-preview-container"],
+[data-testid="reaction-entry-point"],
+#main [data-testid^="conv-msg-"] span.x1q3ucki.x2lah0s.x1c4vz4f {
+  border-radius: 0 !important;
+  border-start-start-radius: 0 !important;
+  border-start-end-radius: 0 !important;
+  border-end-end-radius: 0 !important;
+  border-end-start-radius: 0 !important;
 }
 
-/* Type. Broad within its scope but safe: font-family never moves layout. */
-#side, #side *,
-#main, #main *,
-#app [role="navigation"], #app [role="navigation"] * {
+/* Avatars. The group/fallback ones take a radius (4 of them). The 1:1 ones do
+ * not: they are an SVG <mask> clipping an <image>, plus a separate stroked
+ * <circle> drawn as the decorative ring, and border-radius never reaches them
+ * (20 of them here). CSS `mask` overrides the SVG's own mask attribute, which
+ * is what squares the photo; the ring is faded rather than removed, to keep
+ * this to presentation properties only. */
+[data-testid="subgroup-identity"] { border-radius: 0 !important; }
+
+/* The masked group is the SVG's own child that CARRIES mask="url(#...)", a
+ * SIBLING of <mask> -- not the <g> inside <mask>, which is the one drawing the
+ * circle that defines the shape. Clearing the mask on that inner <g> reports
+ * `mask: none` in the computed style and changes nothing on screen, which is
+ * how this was wrong the first time.
+ *
+ *   <svg><mask id><g fill=white><circle/></g></mask><g mask=url(#id)><image/></g></svg>
+ *                  ^ defines the shape              ^ the one to clear          */
+svg:has(> mask > g > circle) > g[mask] { mask: none !important; }
+
+/* The search field's painted surface is an ancestor of its semantic input. */
+#side :where(div, form):has(:where(
+  input[type="search"], [role="searchbox"],
+  [role="textbox"][aria-label*="search" i], [role="textbox"][aria-label*="buscar" i],
+  [data-testid*="search" i]
+)) {
+  border-radius: 0 !important;
+  border-start-start-radius: 0 !important;
+  border-start-end-radius: 0 !important;
+  border-end-end-radius: 0 !important;
+  border-end-start-radius: 0 !important;
+}
+
+/* ---- bubbles ---- */
+
+/* WhatsApp publishes --incoming-background and --outgoing-background, but
+ * overriding them repaints NOTHING: the bubbles do not read them. Kept in case
+ * another surface does. */
+:root {
+  --incoming-background: var(--omx-in-bg) !important;
+  --outgoing-background: var(--omx-out-bg) !important;
+}
+
+/* What paints a bubble is a StyleX class under msg-container, and it takes TWO:
+ * `.xu342n7` looks like the incoming marker and matches 19 as a direct child,
+ * of which ELEVEN carry the outgoing colour -- alone it would recolour the
+ * user's own messages as received. These pairs match exactly the elements that
+ * really carry the bubble background, counted by computed style.
+ *
+ * To re-find them: list the children of [data-testid="msg-container"], split
+ * them by computed backgroundColor, and take the classes present in every
+ * element of one group and absent from the other. */
+#main [data-testid="msg-container"] > .xu342n7.x1ew7x2d {
+  background-color: var(--omx-in-bg) !important;
+  color: var(--omx-in-fg) !important;
+}
+#main [data-testid="msg-container"] > .x1liijdw.x1g5lz36 {
+  background-color: var(--omx-out-bg) !important;
+  color: var(--omx-out-fg) !important;
+}
+#main [data-testid="msg-container"] > .xu342n7.x1ew7x2d span,
+#main [data-testid="msg-container"] > .xu342n7.x1ew7x2d div {
+  color: var(--omx-in-fg) !important;
+}
+#main [data-testid="msg-container"] > .x1liijdw.x1g5lz36 span,
+#main [data-testid="msg-container"] > .x1liijdw.x1g5lz36 div {
+  color: var(--omx-out-fg) !important;
+}
+
+/* Read receipts: no testid on the icon, so anchored on the path's own `d`;
+ * its <svg> carries <title>wds-ic-read</title>. 10 matches. */
+svg path[d^="M14.73 6.01a1 1 0 0 1 1.41-.15"] { fill: var(--omx-accent) !important; }
+
+/* Type. Broad within scope but safe: font-family never moves layout. */
+#side, #side *, #main, #main *, #app header, #app header * {
   font-family: var(--omx-font) !important;
 }
