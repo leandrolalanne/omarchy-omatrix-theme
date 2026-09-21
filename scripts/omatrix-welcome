@@ -94,15 +94,11 @@ trap 'printf "%s%s" "$RESET" "$SHOW"' EXIT
 
 type_out "$L1"; printf '\n'
 type_out "$L2"
-# The dots run twice: they appear one at a time, clear, and come again, which is
-# what a program that is still working looks like. They are a beat, not a wait,
-# so they get their own speed -- the rest of the banner is a machine printing and
-# would look wrong at this rate.
-for (( c = 0; c < 2; c++ )); do
-  for (( d = 0; d < 3; d++ )); do
-    printf '.'; pause "$DOT"
-  done
-  (( c == 0 )) && { printf '\b\b\b   \b\b\b'; pause "$DOT"; }
+# Three dots, appearing one at a time: the pause where a program is still
+# working. They are a beat rather than a wait, so they keep their own speed --
+# the rest of the banner is a machine printing and would read wrong this slow.
+for (( d = 0; d < 3; d++ )); do
+  printf '.'; pause "$DOT"
 done
 printf '\n'
 type_out "$LEAD"
