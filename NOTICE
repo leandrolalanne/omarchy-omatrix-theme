@@ -1,0 +1,17 @@
+omatrix
+Copyright (c) 2026 Leandro Lalanne
+
+The digital rain, its MSDF glyph atlases and its palettes derive from
+Rezmason/matrix (https://github.com/Rezmason/matrix), MIT, by way of
+matrix-rain (https://github.com/leandrolalanne/matrix-rain).
+
+backgrounds/07-crt-late-night.webp comes from the SolarOS theme.
+
+fonts/WhiteRabbit.ttf is White Rabbit by Matthew Welch, MIT. Its licence is
+kept beside it in fonts/WhiteRabbit-LICENSE.txt. It is shipped but not used.
+
+Courier Prime is under the SIL Open Font License and is not redistributed here;
+the theme names it and expects it installed.
+
+This is an unpaid fan project. It is not affiliated with or endorsed by
+Warner Bros. or any other rights holder in The Matrix.
